@@ -1,0 +1,56 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <form id="main-form">
+        <label for="generation">Generación:</label>
+        <select id="generation" name="generation">
+            <option value="" disabled selected>Seleccione una generación</option>
+            <!-- Agregar opciones de generación aquí -->
+        </select>
+        <br>
+        <label for="server">Server:</label>
+        <select id="server" name="server">
+            <option value="" disabled selected>Seleccione un server</option>
+        </select>
+        <br>
+        <label for="cores">Cores:</label>
+        <select id="cores" name="cores">
+            <option value="" disabled selected>Seleccione cores</option>
+        </select>
+        <br>
+        <label for="smt">SMT:</label>
+        <select id="smt" name="smt">
+            <option value="" disabled selected>Seleccione SMT</option>
+        </select>
+        <br>
+        <label for="rperf">rPerf:</label>
+        <select id="rperf" name="rperf">
+            <option value="" disabled selected>Seleccione rPerf</option>
+        </select>
+        <br>
+        <button type="button" id="add-button">Agregar</button>
+    </form>
+    <br>
+    <table id="configurations-table" border="1">
+        <thead>
+            <tr>
+                <th>Generación</th>
+                <th>Server</th>
+                <th>Cores</th>
+                <th>SMT</th>
+                <th>rPerf</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</body>
+</html>
+
+

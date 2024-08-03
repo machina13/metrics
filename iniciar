@@ -1,0 +1,5 @@
+docker build -t my_flask_app .
+docker run --name my_postgres -e POSTGRES_DB=mydatabase -e POSTGRES_USER=myuser -e POSTGRES_PASSWORD=mypassword -v db_data:/var/lib/postgresql/data -p 5432:5432 -d postgres:13
+
+docker run --name my_flask_app --link my_postgres:db -e DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydatabase -p 5000:5000 -d my_flask_app
+
