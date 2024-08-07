@@ -9,87 +9,94 @@
 </head>
 <body>
     <div class="container mt-5">
-        <form id="main-form" class="needs-validation" novalidate>
-            <div class="form-group">
-                <label for="generation">Generación:</label>
-                <select id="generation" name="generation" class="form-control" required>
-                    <option value="" disabled selected>Seleccione una generación</option>
-                    {% for gen in generation %}
-                        <option value="{{ gen[0] }}">{{ gen[0] }}</option>
-                    {% endfor %}
-                </select>
-                <div class="invalid-feedback">
-                    Por favor, seleccione una generación.
-                </div>
+        <div class="row">
+            <!-- Formulario -->
+            <div class="col-md-6">
+                <form id="main-form" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="generation">Generación:</label>
+                        <select id="generation" name="generation" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una generación</option>
+                            {% for gen in generation %}
+                                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una generación.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="server">Server:</label>
+                        <select id="server" name="server" class="form-control" required>
+                            <option value="" disabled selected>Seleccione un server</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione un server.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cores">Cores:</label>
+                        <select id="cores" name="cores" class="form-control" required>
+                            <option value="" disabled selected>Seleccione cores</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione cores.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="percentage">% Utilizacion:</label>
+                        <input type="number" id="percentage" name="percentage" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Por favor, ingrese un porcentaje.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="percentage-column">Aplicar % a:</label>
+                        <select id="percentage-column" name="percentage-column" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una columna</option>
+                            <option value="ST">ST</option>
+                            <option value="SMT2">SMT2</option>
+                            <option value="SMT4">SMT4</option>
+                            <option value="SMT8">SMT8</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una columna.
+                        </div>
+                    </div>
+                    <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="server">Server:</label>
-                <select id="server" name="server" class="form-control" required>
-                    <option value="" disabled selected>Seleccione un server</option>
-                </select>
-                <div class="invalid-feedback">
-                    Por favor, seleccione un server.
-                </div>
+            <!-- Tabla -->
+            <div class="col-md-6">
+                <table id="configurations-table" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Generación</th>
+                            <th>Server</th>
+                            <th>Cores</th>
+                            <th>ST</th>
+                            <th>SMT2</th>
+                            <th>SMT4</th>
+                            <th>SMT8</th>
+                            <th>% Aplicado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3">Total</th>
+                            <th id="total-st">0</th>
+                            <th id="total-smt2">0</th>
+                            <th id="total-smt4">0</th>
+                            <th id="total-smt8">0</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="button" id="save-button" class="btn btn-success">Guardar Registros</button>
             </div>
-            <div class="form-group">
-                <label for="cores">Cores:</label>
-                <select id="cores" name="cores" class="form-control" required>
-                    <option value="" disabled selected>Seleccione cores</option>
-                </select>
-                <div class="invalid-feedback">
-                    Por favor, seleccione cores.
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="percentage">% Utilizacion:</label>
-                <input type="number" id="percentage" name="percentage" class="form-control" required>
-                <div class="invalid-feedback">
-                    Por favor, ingrese un porcentaje.
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="percentage-column">Aplicar % a:</label>
-                <select id="percentage-column" name="percentage-column" class="form-control" required>
-                    <option value="" disabled selected>Seleccione una columna</option>
-                    <option value="ST">ST</option>
-                    <option value="SMT2">SMT2</option>
-                    <option value="SMT4">SMT4</option>
-                    <option value="SMT8">SMT8</option>
-                </select>
-                <div class="invalid-feedback">
-                    Por favor, seleccione una columna.
-                </div>
-            </div>
-            <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
-        </form>
-        <br>
-        <table id="configurations-table" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Generación</th>
-                    <th>Server</th>
-                    <th>Cores</th>
-                    <th>ST</th>
-                    <th>SMT2</th>
-                    <th>SMT4</th>
-                    <th>SMT8</th>
-                    <th>% Aplicado</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="3">Total</th>
-                    <th id="total-st">0</th>
-                    <th id="total-smt2">0</th>
-                    <th id="total-smt4">0</th>
-                    <th id="total-smt8">0</th>
-                    <th></th>
-                </tr>
-            </tfoot>
-        </table>
-        <button type="button" id="save-button" class="btn btn-success">Guardar Registros</button>
+        </div>
     </div>
 
     <script>
