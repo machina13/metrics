@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, jsonify
 import psycopg2
 
@@ -10,16 +9,26 @@ def get_db_connection():
         dbname='data',
         user='myuser',
         password='mypassword',
-        host='db',
+        host='127.0.0.1',
         port='5432'
     )
     return conn
 
+def get_generacion_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT name from server')  # Cambia 'tu_tabla' por el nombre de tu tabla
+    generacion = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return generacion
+
 @app.route('/')
 def index():
-    return render_template('form.html')
+    generacion = get_generacion_data()
+    return render_template('form.html', generacion=generacion)
 
-@app.route('/get_servers', methods=['POST'])
+@app.route('/get_servers', methods=['GET'])
 def get_servers():
     generation = request.form['generation']
     conn = get_db_connection()
@@ -76,15 +85,6 @@ def add_configuration():
     conn.close()
     return jsonify({'status': 'success'})
 
-@app.route('/get_configurations', methods=['GET'])
-def get_configurations():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT generation, server, cores, smt, rperf FROM configurations')
-    configurations = cursor.fetchall()
-    conn.close()
-    return jsonify(configurations)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-

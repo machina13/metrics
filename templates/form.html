@@ -1,4 +1,4 @@
-
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,9 @@
         <label for="generation">Generación:</label>
         <select id="generation" name="generation">
             <option value="" disabled selected>Seleccione una generación</option>
-            <!-- Agregar opciones de generación aquí -->
+            {% for gen in generacion %}
+                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
+            {% endfor %}
         </select>
         <br>
         <label for="server">Server:</label>
@@ -52,5 +54,3 @@
     </table>
 </body>
 </html>
-
-
