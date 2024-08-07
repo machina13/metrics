@@ -53,10 +53,17 @@ def get_smt():
     cores = request.form['cores']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT smt FROM server WHERE cores = %s ', (cores,))
-    smts = cursor.fetchall()
+    cursor.execute('SELECT DISTINCT sm FROM server WHERE cores = %s', (cores,))
+    sm_data = cursor.fetchall()
+    cursor.execute('SELECT DISTINCT smt2 FROM server WHERE cores = %s', (cores,))
+    smt2_data = cursor.fetchall()
+    cursor.execute('SELECT DISTINCT smt4 FROM server WHERE cores = %s', (cores,))
+    smt4_data = cursor.fetchall()
+    cursor.execute('SELECT DISTINCT smt8 FROM server WHERE cores = %s', (cores,))
+    smt8_data = cursor.fetchall()
     conn.close()
-    return jsonify(smts)
+    return jsonify(sm_data, smt2_data, smt4_data, smt8_data)
+
 
 @app.route('/get_rperf', methods=['POST'])
 def get_rperf():

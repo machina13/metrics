@@ -50,7 +50,10 @@
                     <th>Generación</th>
                     <th>Server</th>
                     <th>Cores</th>
-                    <th>SMT</th>
+                    <th>SM</th>
+                    <th>SMT2</th>
+                    <th>SMT4</th>
+                    <th>SMT8</th>
                     <th>rPerf</th>
                 </tr>
             </thead>
@@ -74,6 +77,48 @@
                         $.each(data, function(index, value) {
                             $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
                         });
+                    }
+                });
+            });
+
+            $('#add-button').click(function() {
+                var generation = $('#generation').val();
+                var server = $('#server').val();
+                var cores = $('#cores').val();
+
+                $.ajax({
+                    url: '/get_smt',
+                    type: 'POST',
+                    data: {cores: cores},
+                    success: function(smtData) {
+                        var sm = smtData[0] ? smtData[0][0] : '';
+                        var smt2 = smtData[1] ? smtData[1][0] : '';
+                        var smt4 = smtData[2] ? smtData[2][0] : '';
+                        var smt8 = smtData[3] ? smtData[3][0] : '';
+
+                        var newRow = `<tr>
+                            <td>${generation}</td>
+                            <td>${server}</td>
+                            <td>${cores}</td>
+                            <td>${sm}</td>
+                            <td>${smt2}</td>
+                            <td>${smt4}</td>
+                            <td>${smt8}</td>
+                            <td></td>
+                        </tr>`;
+
+                        $('#configurations-table tbody').append(newRow);
+                    }
+                });
+
+                $.ajax({
+                    url: '/get_rperf',
+                    type: 'POST',
+                    data: {smt: cores}, // Ajusta los datos según sea necesario
+                    success: function(rperfData) {
+                        var $lastRow = $('#configurations-table tbody tr:last');
+                        var rperf = rperfData[0] ? rperfData[0][0] : '';
+                        $lastRow.find('td:last').text(rperf);
                     }
                 });
             });
