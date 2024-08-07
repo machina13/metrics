@@ -17,7 +17,7 @@ def get_db_connection():
 def get_generacion_data():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name from server')  # Cambia 'tu_tabla' por el nombre de tu tabla
+    cursor.execute('SELECT DISTINCT name from generation')  # Cambia 'tu_tabla' por el nombre de tu tabla
     generacion = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -28,12 +28,12 @@ def index():
     generacion = get_generacion_data()
     return render_template('form.html', generacion=generacion)
 
-@app.route('/get_servers', methods=['GET'])
+@app.route('/get_servers', methods=['POST'])
 def get_servers():
-    generation = request.form['generation']
+    generation = request.form['generacion']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name from server', (generation,))
+    cursor.execute('SELECT DISTINCT name from server where generation = %s ', (generacion,))
     servers = cursor.fetchall()
     conn.close()
     return jsonify(servers)
