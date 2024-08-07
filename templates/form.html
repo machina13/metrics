@@ -40,6 +40,26 @@
                     Por favor, seleccione cores.
                 </div>
             </div>
+            <div class="form-group">
+                <label for="percentage">Porcentaje:</label>
+                <input type="number" id="percentage" name="percentage" class="form-control" required>
+                <div class="invalid-feedback">
+                    Por favor, ingrese un porcentaje.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="percentage-column">Aplicar porcentaje a:</label>
+                <select id="percentage-column" name="percentage-column" class="form-control" required>
+                    <option value="" disabled selected>Seleccione una columna</option>
+                    <option value="ST">ST</option>
+                    <option value="SMT2">SMT2</option>
+                    <option value="SMT4">SMT4</option>
+                    <option value="SMT8">SMT8</option>
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione una columna.
+                </div>
+            </div>
             <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
         </form>
         <br>
@@ -53,6 +73,7 @@
                     <th>SMT2</th>
                     <th>SMT4</th>
                     <th>SMT8</th>
+                    <th>Porcentaje Aplicado</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,6 +85,7 @@
                     <th id="total-smt2">0</th>
                     <th id="total-smt4">0</th>
                     <th id="total-smt8">0</th>
+                    <th></th>
                 </tr>
             </tfoot>
         </table>
@@ -126,8 +148,10 @@
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
+                var percentage = $('#percentage').val();
+                var percentageColumn = $('#percentage-column').val();
 
-                if (!generation || !server || !cores) {
+                if (!generation || !server || !cores || !percentage || !percentageColumn) {
                     alert("Por favor complete todos los campos.");
                     return;
                 }
@@ -143,6 +167,17 @@
                             var smt4 = smtData[0].smt4 || '';
                             var smt8 = smtData[0].smt8 || '';
 
+                            var appliedPercentage = 0;
+                            if (percentageColumn === 'ST') {
+                                appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
+                            } else if (percentageColumn === 'SMT2') {
+                                appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
+                            } else if (percentageColumn === 'SMT4') {
+                                appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
+                            } else if (percentageColumn === 'SMT8') {
+                                appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
+                            }
+
                             var newRow = `<tr>
                                 <td>${generation}</td>
                                 <td>${server}</td>
@@ -151,6 +186,7 @@
                                 <td>${smt2}</td>
                                 <td>${smt4}</td>
                                 <td>${smt8}</td>
+                                <td>${appliedPercentage}</td>
                             </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
@@ -177,7 +213,8 @@
                         sm: row[3],
                         smt2: row[4],
                         smt4: row[5],
-                        smt8: row[6]
+                        smt8: row[6],
+                        percentageApplied: row[7]
                     });
                 });
 
