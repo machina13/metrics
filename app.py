@@ -56,7 +56,7 @@ def get_smt():
     cursor = conn.cursor()
 
     query = """
-        SELECT DISTINCT b.sm, b.smt2, b.smt4, b.smt8
+        SELECT DISTINCT b.s, b.smt2, b.smt4, b.smt8
         FROM server AS a
         JOIN rPerf AS b ON a.id_server = b.id_server
         WHERE a.cores = %s AND a.name = %s
