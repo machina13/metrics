@@ -6,7 +6,6 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <div class="container mt-5">
@@ -111,24 +110,28 @@
                 $.ajax({
                     url: '/get_smt',
                     type: 'POST',
-                    data: {cores: cores},
+                    data: {cores: cores, server: server},
                     success: function(smtData) {
-                        var sm = smtData[0] ? smtData[0][0] : '';
-                        var smt2 = smtData[1] ? smtData[1][0] : '';
-                        var smt4 = smtData[2] ? smtData[2][0] : '';
-                        var smt8 = smtData[3] ? smtData[3][0] : '';
+                        if (smtData.length > 0) {
+                            var sm = smtData[0].sm || '';
+                            var smt2 = smtData[0].smt2 || '';
+                            var smt4 = smtData[0].smt4 || '';
+                            var smt8 = smtData[0].smt8 || '';
 
-                        var newRow = `<tr>
-                            <td>${generation}</td>
-                            <td>${server}</td>
-                            <td>${cores}</td>
-                            <td>${sm}</td>
-                            <td>${smt2}</td>
-                            <td>${smt4}</td>
-                            <td>${smt8}</td>
-                        </tr>`;
+                            var newRow = `<tr>
+                                <td>${generation}</td>
+                                <td>${server}</td>
+                                <td>${cores}</td>
+                                <td>${sm}</td>
+                                <td>${smt2}</td>
+                                <td>${smt4}</td>
+                                <td>${smt8}</td>
+                            </tr>`;
 
-                        $('#configurations-table tbody').append(newRow);
+                            $('#configurations-table tbody').append(newRow);
+                        } else {
+                            alert("No se encontraron datos para las selecciones proporcionadas.");
+                        }
                     }
                 });
             });

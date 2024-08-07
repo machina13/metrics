@@ -61,11 +61,9 @@ def get_smt():
         JOIN rperf AS b ON a.id_server = b.id_server
         WHERE a.cores = %s AND a.name = %s
     """
-    cursor.execute(query, (cores, server))
+    cursor.execute(query, (cores, server,))
     result = cursor.fetchall()
-
     conn.close()
-
     smt_data = [{"sm": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3]} for row in result]
     return jsonify(smt_data)
 
