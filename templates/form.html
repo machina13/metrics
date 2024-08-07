@@ -57,11 +57,36 @@
             </thead>
             <tbody>
             </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3">Total</th>
+                    <th id="total-st">0</th>
+                    <th id="total-smt2">0</th>
+                    <th id="total-smt4">0</th>
+                    <th id="total-smt8">0</th>
+                </tr>
+            </tfoot>
         </table>
         <button type="button" id="save-button" class="btn btn-success">Guardar Registros</button>
     </div>
 
     <script>
+        function updateTotals() {
+            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0;
+
+            $('#configurations-table tbody tr').each(function() {
+                totalST += parseInt($(this).find('td').eq(3).text()) || 0;
+                totalSMT2 += parseInt($(this).find('td').eq(4).text()) || 0;
+                totalSMT4 += parseInt($(this).find('td').eq(5).text()) || 0;
+                totalSMT8 += parseInt($(this).find('td').eq(6).text()) || 0;
+            });
+
+            $('#total-st').text(totalST);
+            $('#total-smt2').text(totalSMT2);
+            $('#total-smt4').text(totalSMT4);
+            $('#total-smt8').text(totalSMT8);
+        }
+
         $(document).ready(function() {
             $('#generation').change(function() {
                 var generation = $(this).val();
@@ -129,6 +154,7 @@
                             </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
+                            updateTotals();
                         } else {
                             alert("No se encontraron datos para las selecciones proporcionadas.");
                         }
@@ -164,6 +190,7 @@
                         if (response.status === 'success') {
                             alert('Registros guardados exitosamente.');
                             $('#configurations-table tbody').empty();
+                            updateTotals();
                         } else {
                             alert('Error al guardar los registros.');
                         }
