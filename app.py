@@ -17,7 +17,7 @@ def get_db_connection():
 def get_generacion_data():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name from server')  # Cambia 'tu_tabla' por el nombre de tu tabla
+    cursor.execute('SELECT DISTINCT name from server')
     generacion = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -30,7 +30,7 @@ def index():
 
 @app.route('/get_servers', methods=['POST'])
 def get_servers():
-    generation = request.form['generacion']
+    generation = request.form['generation']
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT DISTINCT name from server where generation = %s ', (generacion,))
