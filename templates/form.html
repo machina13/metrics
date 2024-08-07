@@ -103,7 +103,7 @@
                             <th id="total-smt2">0</th>
                             <th id="total-smt4">0</th>
                             <th id="total-smt8">0</th>
-                            <th></th>
+                            <th id="total-applied-percentage">0</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -114,19 +114,21 @@
 
     <script>
         function updateTotals() {
-            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0;
+            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalAppliedPercentage = 0;
 
             $('#configurations-table tbody tr').each(function() {
                 totalST += parseInt($(this).find('td').eq(3).text()) || 0;
                 totalSMT2 += parseInt($(this).find('td').eq(4).text()) || 0;
                 totalSMT4 += parseInt($(this).find('td').eq(5).text()) || 0;
                 totalSMT8 += parseInt($(this).find('td').eq(6).text()) || 0;
+                totalAppliedPercentage += parseFloat($(this).find('td').eq(7).text()) || 0;
             });
 
             $('#total-st').text(totalST);
             $('#total-smt2').text(totalSMT2);
             $('#total-smt4').text(totalSMT4);
             $('#total-smt8').text(totalSMT8);
+            $('#total-applied-percentage').text(totalAppliedPercentage.toFixed(2));
         }
 
         $(document).ready(function() {
