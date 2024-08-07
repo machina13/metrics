@@ -25,7 +25,7 @@ def get_generation_data():
 
 @app.route('/')
 def index():
-    generation = get_generacion_data()
+    generation = get_generation_data()
     return render_template('form.html', generation=generation)
 
 @app.route('/get_servers', methods=['POST'])
