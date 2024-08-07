@@ -43,7 +43,7 @@ def get_cores():
     server = request.form['server']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT cores FROM configurations WHERE server = %s', (server,))
+    cursor.execute('SELECT DISTINCT cores FROM server WHERE server = %s', (server,))
     cores = cursor.fetchall()
     conn.close()
     return jsonify(cores)
