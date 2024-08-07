@@ -43,7 +43,7 @@ def get_cores():
     server = request.form['server']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT cores FROM server WHERE server = %s', (server,))
+    cursor.execute('SELECT DISTINCT cores FROM server WHERE name = %s', (server,))
     cores = cursor.fetchall()
     conn.close()
     return jsonify(cores)
@@ -53,7 +53,7 @@ def get_smt():
     cores = request.form['cores']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT smt FROM configurations WHERE cores = %s', (cores,))
+    cursor.execute('SELECT DISTINCT smt FROM server WHERE cores = %s and name =%s' , (cores,server,))
     smts = cursor.fetchall()
     conn.close()
     return jsonify(smts)
