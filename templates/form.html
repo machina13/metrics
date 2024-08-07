@@ -42,7 +42,6 @@
                 </div>
             </div>
             <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
-            <button type="button" id="save-button" class="btn btn-success mt-3">Guardar Registros</button>
         </form>
         <br>
         <table id="configurations-table" class="table table-bordered">
@@ -60,6 +59,7 @@
             <tbody>
             </tbody>
         </table>
+        <button type="button" id="save-button" class="btn btn-success">Guardar Registros</button>
     </div>
 
     <script>
@@ -81,10 +81,32 @@
                 });
             });
 
+            $('#server').change(function() {
+                var server = $(this).val();
+                $.ajax({
+                    url: '/get_cores',
+                    type: 'POST',
+                    data: {server: server},
+                    success: function(data) {
+                        var $coresSelect = $('#cores');
+                        $coresSelect.empty();
+                        $coresSelect.append('<option value="" disabled selected>Seleccione cores</option>');
+                        $.each(data, function(index, value) {
+                            $coresSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                        });
+                    }
+                });
+            });
+
             $('#add-button').click(function() {
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
+
+                if (!generation || !server || !cores) {
+                    alert("Por favor complete todos los campos.");
+                    return;
+                }
 
                 $.ajax({
                     url: '/get_smt',
@@ -113,36 +135,35 @@
 
             $('#save-button').click(function() {
                 var configurations = [];
+
                 $('#configurations-table tbody tr').each(function() {
-                    var row = $(this);
-                    var generation = row.find('td:eq(0)').text();
-                    var server = row.find('td:eq(1)').text();
-                    var cores = row.find('td:eq(2)').text();
-                    var sm = row.find('td:eq(3)').text();
-                    var smt2 = row.find('td:eq(4)').text();
-                    var smt4 = row.find('td:eq(5)').text();
-                    var smt8 = row.find('td:eq(6)').text();
+                    var row = $(this).find('td').map(function() {
+                        return $(this).text();
+                    }).get();
 
                     configurations.push({
-                        generation: generation,
-                        server: server,
-                        cores: cores,
-                        sm: sm,
-                        smt2: smt2,
-                        smt4: smt4,
-                        smt8: smt8
+                        generation: row[0],
+                        server: row[1],
+                        cores: row[2],
+                        sm: row[3],
+                        smt2: row[4],
+                        smt4: row[5],
+                        smt8: row[6]
                     });
                 });
 
                 $.ajax({
-                    url: '/add_configurations',
+                    url: '/add_configuration',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({configurations: configurations}),
+                    data: JSON.stringify(configurations),
                     success: function(response) {
-                        alert('Registros guardados exitosamente.');
-                        // Limpiar la tabla después de guardar
-                        $('#configurations-table tbody').empty();
+                        if (response.status === 'success') {
+                            alert('Registros guardados exitosamente.');
+                            $('#configurations-table tbody').empty();
+                        } else {
+                            alert('Error al guardar los registros.');
+                        }
                     }
                 });
             });
