@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Formulario</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            flex: 0 0 40%;
+        }
+        .table-container {
+            flex: 0 0 60%;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
@@ -11,7 +19,7 @@
     <div class="container mt-5">
         <div class="row">
             <!-- Formulario -->
-            <div class="col-md-6">
+            <div class="form-container">
                 <form id="main-form" class="needs-validation" novalidate>
                     <div class="form-group">
                         <label for="generation">Generación:</label>
@@ -67,7 +75,7 @@
                 </form>
             </div>
             <!-- Tabla -->
-            <div class="col-md-6">
+            <div class="table-container">
                 <table id="configurations-table" class="table table-bordered">
                     <thead>
                         <tr>
