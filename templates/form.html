@@ -3,54 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <title>Formulario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <form id="main-form">
-        <label for="generation">Generación:</label>
-        <select id="generation" name="generation">
-            <option value="" disabled selected>Seleccione una generación</option>
-            {% for gen in generation %}
-                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
-            {% endfor %}
-        </select>
+    <div class="container mt-5">
+        <form id="main-form" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="generation">Generación:</label>
+                <select id="generation" name="generation" class="form-control" required>
+                    <option value="" disabled selected>Seleccione una generación</option>
+                    {% for gen in generacion %}
+                        <option value="{{ gen[0] }}">{{ gen[0] }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione una generación.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="server">Server:</label>
+                <select id="server" name="server" class="form-control" required>
+                    <option value="" disabled selected>Seleccione un server</option>
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione un server.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cores">Cores:</label>
+                <select id="cores" name="cores" class="form-control" required>
+                    <option value="" disabled selected>Seleccione cores</option>
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione cores.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="smt">SMT:</label>
+                <select id="smt" name="smt" class="form-control" required>
+                    <option value="" disabled selected>Seleccione SMT</option>
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione SMT.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="rperf">rPerf:</label>
+                <select id="rperf" name="rperf" class="form-control" required>
+                    <option value="" disabled selected>Seleccione rPerf</option>
+                </select>
+                <div class="invalid-feedback">
+                    Por favor, seleccione rPerf.
+                </div>
+            </div>
+            <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
+        </form>
         <br>
-        <label for="server">Server:</label>
-        <select id="server" name="server">
-            <option value="" disabled selected>Seleccione un server</option>
-        </select>
-        <br>
-        <label for="cores">Cores:</label>
-        <select id="cores" name="cores">
-            <option value="" disabled selected>Seleccione cores</option>
-        </select>
-        <br>
-        <label for="smt">SMT:</label>
-        <select id="smt" name="smt">
-            <option value="" disabled selected>Seleccione SMT</option>
-        </select>
-        <br>
-        <label for="rperf">rPerf:</label>
-        <select id="rperf" name="rperf">
-            <option value="" disabled selected>Seleccione rPerf</option>
-        </select>
-        <br>
-        <button type="button" id="add-button">Agregar</button>
-    </form>
-    <br>
-    <table id="configurations-table" border="1">
-        <thead>
-            <tr>
-                <th>Generación</th>
-                <th>Server</th>
-                <th>Cores</th>
-                <th>SMT</th>
-                <th>rPerf</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+        <table id="configurations-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Generación</th>
+                    <th>Server</th>
+                    <th>Cores</th>
+                    <th>SMT</th>
+                    <th>rPerf</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#generation').change(function() {
+                var generation = $(this).val();
+                $.ajax({
+                    url: '/get_servers',
+                    type: 'POST',
+                    data: {generation: generation},
+                    success: function(data) {
+                        var $serverSelect = $('#server');
+                        $serverSelect.empty();
+                        $serverSelect.append('<option value="" disabled selected>Seleccione un server</option>');
+                        $.each(data, function(index, value) {
+                            $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                        });
+                    }
+                });
+            });
+
+            // Validación del formulario
+            (function() {
+                'use strict';
+                window.addEventListener('load', function() {
+                    var forms = document.getElementsByClassName('needs-validation');
+                    var validation = Array.prototype.filter.call(forms, function(form) {
+                        form.addEventListener('submit', function(event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
+        });
+    </script>
 </body>
 </html>
