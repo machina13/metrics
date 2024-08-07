@@ -14,19 +14,19 @@ def get_db_connection():
     )
     return conn
 
-def get_generacion_data():
+def get_generation_data():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT DISTINCT name from server')
-    generacion = cursor.fetchall()
+    generation = cursor.fetchall()
     cursor.close()
     conn.close()
-    return generacion
+    return generation
 
 @app.route('/')
 def index():
     generacion = get_generacion_data()
-    return render_template('form.html', generacion=generacion)
+    return render_template('form.html', generation=generation)
 
 @app.route('/get_servers', methods=['POST'])
 def get_servers():
