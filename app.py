@@ -65,15 +65,7 @@ def get_smt():
     return jsonify(sm_data, smt2_data, smt4_data, smt8_data)
 
 
-@app.route('/get_rperf', methods=['POST'])
-def get_rperf():
-    smt = request.form['smt']
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT rperf FROM configurations WHERE smt = %s', (smt,))
-    rperfs = cursor.fetchall()
-    conn.close()
-    return jsonify(rperfs)
+
 
 @app.route('/add_configuration', methods=['POST'])
 def add_configuration():

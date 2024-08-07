@@ -54,7 +54,6 @@
                     <th>SMT2</th>
                     <th>SMT4</th>
                     <th>SMT8</th>
-                    <th>rPerf</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,16 +110,7 @@
                     }
                 });
 
-                $.ajax({
-                    url: '/get_rperf',
-                    type: 'POST',
-                    data: {smt: cores}, // Ajusta los datos según sea necesario
-                    success: function(rperfData) {
-                        var $lastRow = $('#configurations-table tbody tr:last');
-                        var rperf = rperfData[0] ? rperfData[0][0] : '';
-                        $lastRow.find('td:last').text(rperf);
-                    }
-                });
+
             });
 
             // Validación del formulario
