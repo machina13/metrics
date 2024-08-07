@@ -67,19 +67,16 @@ def get_smt():
 
 
 
-@app.route('/add_configuration', methods=['POST'])
-def add_configuration():
-    generation = request.form['generation']
-    server = request.form['server']
-    cores = request.form['cores']
-    smt = request.form['smt']
-    rperf = request.form['rperf']
+@app.route('/add_configurations', methods=['POST'])
+def add_configurations():
+    configurations = request.json.get('configurations')
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        'INSERT INTO configurations (generation, server, cores, smt, rperf) VALUES (%s, %s, %s, %s, %s)',
-        (generation, server, cores, smt, rperf)
-    )
+    for config in configurations:
+        cursor.execute(
+            'INSERT INTO configurations (generation, server, cores, sm, smt2, smt4, smt8) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+            (config['generation'], config['server'], config['cores'], config['sm'], config['smt2'], config['smt4'], config['smt8'])
+        )
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})

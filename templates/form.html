@@ -42,6 +42,7 @@
                 </div>
             </div>
             <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
+            <button type="button" id="save-button" class="btn btn-success mt-3">Guardar Registros</button>
         </form>
         <br>
         <table id="configurations-table" class="table table-bordered">
@@ -103,14 +104,47 @@
                             <td>${smt2}</td>
                             <td>${smt4}</td>
                             <td>${smt8}</td>
-                            <td></td>
                         </tr>`;
 
                         $('#configurations-table tbody').append(newRow);
                     }
                 });
+            });
 
+            $('#save-button').click(function() {
+                var configurations = [];
+                $('#configurations-table tbody tr').each(function() {
+                    var row = $(this);
+                    var generation = row.find('td:eq(0)').text();
+                    var server = row.find('td:eq(1)').text();
+                    var cores = row.find('td:eq(2)').text();
+                    var sm = row.find('td:eq(3)').text();
+                    var smt2 = row.find('td:eq(4)').text();
+                    var smt4 = row.find('td:eq(5)').text();
+                    var smt8 = row.find('td:eq(6)').text();
 
+                    configurations.push({
+                        generation: generation,
+                        server: server,
+                        cores: cores,
+                        sm: sm,
+                        smt2: smt2,
+                        smt4: smt4,
+                        smt8: smt8
+                    });
+                });
+
+                $.ajax({
+                    url: '/add_configurations',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({configurations: configurations}),
+                    success: function(response) {
+                        alert('Registros guardados exitosamente.');
+                        // Limpiar la tabla después de guardar
+                        $('#configurations-table tbody').empty();
+                    }
+                });
             });
 
             // Validación del formulario
