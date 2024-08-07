@@ -17,7 +17,7 @@ def get_db_connection():
 def get_generacion_data():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT generacion FROM tu_tabla')  # Cambia 'tu_tabla' por el nombre de tu tabla
+    cursor.execute('SELECT DISTINCT name from server')  # Cambia 'tu_tabla' por el nombre de tu tabla
     generacion = cursor.fetchall()
     cursor.close()
     conn.close()
