@@ -53,7 +53,7 @@ def get_smt():
     cores = request.form['cores']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT smt FROM server WHERE cores = %s and name =%s' , (cores,server,))
+    cursor.execute('SELECT DISTINCT smt FROM server WHERE cores = %s and name =%s', (cores,server,))
     smts = cursor.fetchall()
     conn.close()
     return jsonify(smts)
