@@ -53,7 +53,7 @@ def get_smt():
     cores = request.form['cores']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT b.st FROM server as a, rPerf as b WHERE a.id_server=b.id_server and b.core = %s', (cores,))
+    cursor.execute('SELECT DISTINCT b.st FROM server as a, rPerf as b WHERE a.id_server=b.id_server and a.core = %s and a.name = %s' , (cores,server,))
     sm_data = cursor.fetchall()
     cursor.execute('SELECT DISTINCT smt2 FROM server WHERE cores = %s', (cores,))
     smt2_data = cursor.fetchall()
