@@ -15,7 +15,7 @@
                 <label for="generation">Generación:</label>
                 <select id="generation" name="generation" class="form-control" required>
                     <option value="" disabled selected>Seleccione una generación</option>
-                    {% for gen in generacion %}
+                    {% for gen in generation %}
                         <option value="{{ gen[0] }}">{{ gen[0] }}</option>
                     {% endfor %}
                 </select>
