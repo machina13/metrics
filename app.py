@@ -51,19 +51,26 @@ def get_cores():
 @app.route('/get_smt', methods=['POST'])
 def get_smt():
     cores = request.form['cores']
+    server = request.form['server']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT b.st FROM server as a, rPerf as b WHERE a.id_server=b.id_server and a.core = %s and a.name = %s' , (cores,server,))
-    sm_data = cursor.fetchall()
-    cursor.execute('SELECT DISTINCT smt2 FROM server WHERE cores = %s', (cores,))
-    smt2_data = cursor.fetchall()
-    cursor.execute('SELECT DISTINCT smt4 FROM server WHERE cores = %s', (cores,))
-    smt4_data = cursor.fetchall()
-    cursor.execute('SELECT DISTINCT smt8 FROM server WHERE cores = %s', (cores,))
-    smt8_data = cursor.fetchall()
-    conn.close()
-    return jsonify(sm_data, smt2_data, smt4_data, smt8_data)
 
+    query = """
+        SELECT DISTINCT b.sm, b.smt2, b.smt4, b.smt8
+        FROM server AS a
+        JOIN rPerf AS b ON a.id_server = b.id_server
+        WHERE a.cores = %s AND a.name = %s
+    """
+    cursor.execute(query, (cores, server))
+    result = cursor.fetchall()
+
+    conn.close()
+
+    smt_data = [{"sm": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3]} for row in result]
+    return jsonify(smt_data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 
