@@ -33,7 +33,7 @@ def get_servers():
     generation = request.form['generation']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name FROM name WHERE generation = %s ', (generation,))
+    cursor.execute('SELECT DISTINCT name FROM server WHERE generation = %s ', (generation,))
     servers = cursor.fetchall()
     conn.close()
     return jsonify(servers)
