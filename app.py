@@ -28,12 +28,12 @@ def index():
     generation = get_generation_data()
     return render_template('form.html', generation=generation)
 
-@app.route('/', methods=['POST'])
+@app.route('/get_servers', methods=['POST'])
 def get_servers():
     generation = request.form['generation']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name from server where generation = %s ', (generacion,))
+    cursor.execute('SELECT DISTINCT name FROM server WHERE generation = %s ', (generation,))
     servers = cursor.fetchall()
     conn.close()
     return jsonify(servers)
