@@ -36,8 +36,9 @@
             <!-- Formulario -->
             <div class="form-container col-md-4">
                 <form id="main-form" class="needs-validation" novalidate>
-                    <!-- Form content here... -->
+                    <!-- ... (todo el código de los inputs del formulario) ... -->
                     <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
+                    <button type="button" id="clear-table-button" class="btn btn-danger">Eliminar Todos los Registros</button>
                 </form>
             </div>
             <!-- Tabla -->
@@ -45,20 +46,7 @@
                 <table id="configurations-table" class="table table-bordered">
                     <thead>
                         <tr id="table-headers">
-                            <th>Generación</th>
-                            <th>Server</th>
-                            <th>Cores</th>
-                            <th>Clock</th>
-                            <th>Model</th>
-                            <th>Type</th>
-                            <th># Socket</th>
-                            <th>Core per Socket</th>
-                            <th>ST</th>
-                            <th>SMT2</th>
-                            <th>SMT4</th>
-                            <th>SMT8</th>
-                            <th>% Aplicado</th>
-                            <th>Acciones</th> <!-- Columna para los botones de acción -->
+                            <!-- ... (encabezados de la tabla) ... -->
                         </tr>
                     </thead>
                     <tbody>
@@ -71,11 +59,9 @@
                             <th id="total-smt4">0</th>
                             <th id="total-smt8">0</th>
                             <th id="total-applied">0</th>
-                            <th></th> <!-- Celda vacía para alineación -->
                         </tr>
                     </tfoot>
                 </table>
-                <button type="button" id="clear-table-button" class="btn btn-danger mt-3">Eliminar Todos los Registros</button>
             </div>
         </div>
     </div>
@@ -103,40 +89,6 @@
             $('#metric').change(function() {
                 const selectedMetric = $(this).val();
                 updateTableHeaders(selectedMetric);
-            });
-
-            $('#generation').change(function() {
-                var generation = $(this).val();
-                $.ajax({
-                    url: '/get_servers',
-                    type: 'POST',
-                    data: {generation: generation},
-                    success: function(data) {
-                        var $serverSelect = $('#server');
-                        $serverSelect.empty();
-                        $serverSelect.append('<option value="" disabled selected>Seleccione un server</option>');
-                        $.each(data, function(index, value) {
-                            $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
-                        });
-                    }
-                });
-            });
-
-            $('#server').change(function() {
-                var server = $(this).val();
-                $.ajax({
-                    url: '/get_cores',
-                    type: 'POST',
-                    data: {server: server},
-                    success: function(data) {
-                        var $coresSelect = $('#cores');
-                        $coresSelect.empty();
-                        $coresSelect.append('<option value="" disabled selected>Seleccione cores</option>');
-                        $.each(data, function(index, value) {
-                            $coresSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
-                        });
-                    }
-                });
             });
 
             $('#add-button').click(function() {
@@ -192,7 +144,7 @@
                                 <td>${smt4}</td>
                                 <td>${smt8}</td>
                                 <td>${appliedPercentage}</td>
-                                <td><button type="button" class="btn btn-danger btn-sm delete-row-button">Eliminar</button></td>
+                                <td><button type="button" class="btn btn-danger delete-row-button">Eliminar</button></td>
                             </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
@@ -204,30 +156,33 @@
                 });
             });
 
-            // Eliminar todas las filas de la tabla
             $('#clear-table-button').click(function() {
                 $('#configurations-table tbody').empty();
                 updateTotals();
             });
 
-            // Eliminar una fila individual
             $('#configurations-table').on('click', '.delete-row-button', function() {
                 $(this).closest('tr').remove();
                 updateTotals();
             });
-        });
 
-        function updateTableHeaders(metric) {
-            const headers = $('#table-headers');
-            headers.find('th').show();
-            if (metric === 'saps') {
-                headers.find('th').slice(8, 13).hide(); // Oculta las columnas ST, SMT2, SMT4, SMT8, % Aplicado
-            } else if (metric === 'spec') {
-                headers.find('th').slice(8, 13).hide(); // Oculta las columnas ST, SMT2, SMT4, SMT8, % Aplicado
-            } else if (metric === 'cpw') {
-                headers.find('th').slice(8, 13).hide(); // Oculta las columnas ST, SMT2, SMT4, SMT8, % Aplicado
+            function updateTableHeaders(selectedMetric) {
+                var headers = {
+                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado", "Acciones"],
+                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado", "Acciones"],
+                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado", "Acciones"],
+                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado", "Acciones"]
+                };
+
+                var selectedHeaders = headers[selectedMetric] || headers.rperf;
+                $('#table-headers').empty();
+                selectedHeaders.forEach(function(header) {
+                    if (header) {
+                        $('#table-headers').append(`<th>${header}</th>`);
+                    }
+                });
             }
-        }
+        });
     </script>
 </body>
 </html>
