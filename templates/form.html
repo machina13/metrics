@@ -199,10 +199,11 @@
                    $percentageColumn.append(`<option value="${option.value}">${option.text}</option>`);
                });
            }
-            $('#metric').change(function() {
-                const selectedMetric = $(this).val();
-                updateTableHeaders(selectedMetric);
-            });
+           $('#metric').change(function() {
+               const selectedMetric = $(this).val();
+               updatePercentageOptions(selectedMetric);
+               updateTableHeaders(selectedMetric);
+           });
 
             $('#generation').change(function() {
                 var generation = $(this).val();
