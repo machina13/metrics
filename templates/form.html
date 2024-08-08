@@ -9,17 +9,13 @@
     <style>
         .table-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: space-between;
         }
-        .form-container {
-            width: 100%;
+        .form-container, .table-container {
+            width: 40%;
         }
         .table-container {
-            width: 100%;
-        }
-        table {
-            width: 100%;
+            width: 60%;
         }
     </style>
 </head>
@@ -122,7 +118,7 @@
                         </tr>
                     </tfoot>
                 </table>
-                <button type="button" id="save-button" class="btn btn-success mt-3">Guardar</button>
+
             </div>
         </div>
     </div>
@@ -223,94 +219,155 @@
             });
 
             $('#add-button').click(function() {
+                var metric = $('#metric').val();
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
-                var metric = $('#metric').val();
                 var percentage = $('#percentage').val();
                 var percentageColumn = $('#percentage-column').val();
+                if (!metric || !generation || !server || !cores || !percentage) {
+                    alert("Por favor complete todos los campos.");
+                    return;
+                }
 
-                var st = 0, smt2 = 0, smt4 = 0, smt8 = 0;
-
-                // Obtener los valores correctos según la métrica seleccionada
                 $.ajax({
-                    url: '/get_metric_values',
+                    url: '/get_metric_data',
                     type: 'POST',
-                    data: {
-                        metric: metric,
-                        generation: generation,
-                        server: server,
-                        cores: cores
-                    },
+                    data: {cores: cores, server: server, metric: metric},
                     success: function(data) {
-                        if (metric === 'rperf') {
-                            st = data.st;
-                            smt2 = data.smt2;
-                            smt4 = data.smt4;
-                            smt8 = data.smt8;
-                        } else if (metric === 'saps') {
-                            st = data.sd_bench_saps;
-                            smt2 = data.hana_prod_saps;
-                        } else if (metric === 'spec') {
-                            st = data.spec_int_peak;
-                            smt2 = data.spec_int_basek;
-                        } else if (metric === 'cpw') {
-                            st = data.cpw;
-                        }
+                        if (data.length > 0) {
+                            var newRow;
+                            if (metric === 'rperf') {
+                                var sm = data[0].sm || '';
+                                var smt2 = data[0].smt2 || '';
+                                var smt4 = data[0].smt4 || '';
+                                var smt8 = data[0].smt8 || '';
 
-                        var appliedValue = 0;
-                        if (percentageColumn === 'ST') {
-                            appliedValue = st * (percentage / 100);
-                        } else if (percentageColumn === 'SMT2') {
-                            appliedValue = smt2 * (percentage / 100);
-                        } else if (percentageColumn === 'SMT4') {
-                            appliedValue = smt4 * (percentage / 100);
-                        } else if (percentageColumn === 'SMT8') {
-                            appliedValue = smt8 * (percentage / 100);
-                        }
+                                var appliedPercentage = 0;
+                                if (percentageColumn === 'ST') {
+                                    appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT2') {
+                                    appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT4') {
+                                    appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT8') {
+                                    appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
 
-                        var newRow = `<tr>
-                            <td>${generation}</td>
-                            <td>${server}</td>
-                            <td>${cores}</td>
-                            <td>${st}</td>
-                            <td>${smt2}</td>
-                            <td>${smt4}</td>
-                            <td>${smt8}</td>
-                            <td>${appliedValue.toFixed(2)}</td>
-                        </tr>`;
-                        $('#configurations-table tbody').append(newRow);
-                        updateTotals();
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${sm}</td>
+                                    <td>${smt2}</td>
+                                    <td>${smt4}</td>
+                                    <td>${smt8}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'saps') {
+                                var sdBenchSAPS = data[0].sdBenchSAPS || '';
+                                var hanaProdSAPS = data[0].hanaProdSAPS || '';
+
+                                var appliedPercentage = (parseFloat(hanaProdSAPS) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${sdBenchSAPS}</td>
+                                    <td>${hanaProdSAPS}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'spec') {
+                                var specRatePeak = data[0].specRatePeak || '';
+                                var specRateBase = data[0].specRateBase || '';
+
+                                var appliedPercentage = (parseFloat(specRatePeak) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${specRatePeak}</td>
+                                    <td>${specRateBase}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'cpw') {
+                                var cpw = data[0].cpw || '';
+
+                                var appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${cpw}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            }
+
+                            $('#configurations-table tbody').append(newRow);
+                            updateTotals();
+                        } else {
+                            alert("No se encontraron datos para las selecciones proporcionadas.");
+                        }
                     }
                 });
             });
 
             $('#save-button').click(function() {
                 var configurations = [];
+
                 $('#configurations-table tbody tr').each(function() {
-                    var row = {
-                        generation: $(this).find('td').eq(0).text(),
-                        server: $(this).find('td').eq(1).text(),
-                        cores: $(this).find('td').eq(2).text(),
-                        st: $(this).find('td').eq(3).text(),
-                        smt2: $(this).find('td').eq(4).text(),
-                        smt4: $(this).find('td').eq(5).text(),
-                        smt8: $(this).find('td').eq(6).text(),
-                        appliedValue: $(this).find('td').eq(7).text()
-                    };
-                    configurations.push(row);
+                    var row = $(this).find('td').map(function() {
+                        return $(this).text();
+                    }).get();
+
+                    configurations.push({
+                        generation: row[0],
+                        server: row[1],
+                        cores: row[2],
+                        metricData1: row[3],
+                        metricData2: row[4] || '',
+                        metricData3: row[5] || '',
+                        metricData4: row[6] || '',
+                        percentageApplied: row[7]
+                    });
                 });
 
                 $.ajax({
-                    url: '/save_configurations',
+                    url: '/add_configuration',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(configurations),
                     success: function(response) {
-                        alert(response.message);
+                        if (response.status === 'success') {
+                            alert('Registros guardados exitosamente.');
+                            $('#configurations-table tbody').empty();
+                            updateTotals();
+                        } else {
+                            alert('Error al guardar los registros.');
+                        }
                     }
                 });
             });
+
+            // Validación del formulario
+            (function() {
+                'use strict';
+                window.addEventListener('load', function() {
+                    var forms = document.getElementsByClassName('needs-validation');
+                    var validation = Array.prototype.filter.call(forms, function(form) {
+                        form.addEventListener('submit', function(event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
         });
     </script>
 </body>
