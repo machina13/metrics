@@ -17,7 +17,7 @@ def get_db_connection():
 def get_generation_data():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT generation from server')
+    cursor.execute('SELECT DISTINCT generation FROM server')
     generation = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -33,7 +33,7 @@ def get_servers():
     generation = request.form['generation']
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT name FROM server WHERE generation = %s ', (generation,))
+    cursor.execute('SELECT DISTINCT name FROM server WHERE generation = %s', (generation,))
     servers = cursor.fetchall()
     conn.close()
     return jsonify(servers)
@@ -48,44 +48,69 @@ def get_cores():
     conn.close()
     return jsonify(cores)
 
-@app.route('/get_smt', methods=['POST'])
-def get_smt():
+@app.route('/get_metric_data', methods=['POST'])
+def get_metric_data():
+    metric = request.form['metric']
     cores = request.form['cores']
     server = request.form['server']
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    query = """
-        SELECT DISTINCT b.st, b.smt2, b.smt4, b.smt8
-        FROM server AS a
-        JOIN rperf AS b ON a.id_server = b.id_server
-        WHERE a.cores = %s AND a.name = %s
-    """
-    cursor.execute(query, (cores, server,))
+    metric_query = {
+        'rperf': "SELECT st, smt2, smt4, smt8 FROM rperf WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
+        'saps': "SELECT sd_bench_saps, hana_prod_saps FROM saps WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
+        'spec': "SELECT specrate2017_int_peak, specrate2017_int_basek FROM spec WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
+        'cpw': "SELECT cpw FROM cpw WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)"
+    }
+
+    query = metric_query[metric]
+    cursor.execute(query, (server, cores,))
     result = cursor.fetchall()
     conn.close()
-    smt_data = [{"sm": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3]} for row in result]
-    return jsonify(smt_data)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    metric_data = []
+    if metric == 'rperf':
+        metric_data = [{"st": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3]} for row in result]
+    elif metric == 'saps':
+        metric_data = [{"sd_bench_saps": row[0], "hana_prod_saps": row[1]} for row in result]
+    elif metric == 'spec':
+        metric_data = [{"specrate2017_int_peak": row[0], "specrate2017_int_basek": row[1]} for row in result]
+    elif metric == 'cpw':
+        metric_data = [{"cpw": row[0]} for row in result]
 
+    return jsonify(metric_data)
 
-
-@app.route('/add_configurations', methods=['POST'])
-def add_configurations():
+@app.route('/save_configurations', methods=['POST'])
+def save_configurations():
     configurations = request.json.get('configurations')
     conn = get_db_connection()
     cursor = conn.cursor()
+
     for config in configurations:
-        cursor.execute(
-            'INSERT INTO configurations (generation, server, cores, sm, smt2, smt4, smt8) VALUES (%s, %s, %s, %s, %s, %s, %s)',
-            (config['generation'], config['server'], config['cores'], config['sm'], config['smt2'], config['smt4'], config['smt8'])
-        )
+        if 'st' in config:
+            cursor.execute(
+                'INSERT INTO configurations (generation, server, cores, st, smt2, smt4, smt8, percentage) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['st'], config['smt2'], config['smt4'], config['smt8'], config['percentage'])
+            )
+        elif 'sd_bench_saps' in config:
+            cursor.execute(
+                'INSERT INTO configurations (generation, server, cores, sd_bench_saps, hana_prod_saps, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['sd_bench_saps'], config['hana_prod_saps'], config['percentage'])
+            )
+        elif 'specrate2017_int_peak' in config:
+            cursor.execute(
+                'INSERT INTO configurations (generation, server, cores, specrate2017_int_peak, specrate2017_int_basek, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['specrate2017_int_peak'], config['specrate2017_int_basek'], config['percentage'])
+            )
+        elif 'cpw' in config:
+            cursor.execute(
+                'INSERT INTO configurations (generation, server, cores, cpw, percentage) VALUES (%s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['cpw'], config['percentage'])
+            )
+
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
