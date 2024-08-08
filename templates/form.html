@@ -36,9 +36,69 @@
             <!-- Formulario -->
             <div class="form-container col-md-4">
                 <form id="main-form" class="needs-validation" novalidate>
-                    <!-- ... (todo el código de los inputs del formulario) ... -->
+                    <div class="form-group">
+                        <label for="metric">Métrica de Cómputo:</label>
+                        <select id="metric" name="metric" class="form-control" required>
+                            <option value="rperf">rperf</option>
+                            <option value="saps">saps</option>
+                            <option value="spec">spec</option>
+                            <option value="cpw">cpw</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una métrica de cómputo.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="generation">Generación:</label>
+                        <select id="generation" name="generation" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una generación</option>
+                            {% for gen in generation %}
+                                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una generación.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="server">Server:</label>
+                        <select id="server" name="server" class="form-control" required>
+                            <option value="" disabled selected>Seleccione un server</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione un server.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cores">Cores:</label>
+                        <select id="cores" name="cores" class="form-control" required>
+                            <option value="" disabled selected>Seleccione cores</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione cores.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="percentage">% Utilización:</label>
+                        <input type="number" id="percentage" name="percentage" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Por favor, ingrese un porcentaje.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="percentage-column">Aplicar % a:</label>
+                        <select id="percentage-column" name="percentage-column" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una columna</option>
+                            <option value="ST">ST</option>
+                            <option value="SMT2">SMT2</option>
+                            <option value="SMT4">SMT4</option>
+                            <option value="SMT8">SMT8</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una columna.
+                        </div>
+                    </div>
                     <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
-                    <button type="button" id="clear-table-button" class="btn btn-danger">Eliminar Todos los Registros</button>
                 </form>
             </div>
             <!-- Tabla -->
@@ -46,7 +106,19 @@
                 <table id="configurations-table" class="table table-bordered">
                     <thead>
                         <tr id="table-headers">
-                            <!-- ... (encabezados de la tabla) ... -->
+                            <th>Generación</th>
+                            <th>Server</th>
+                            <th>Cores</th>
+                            <th>Clock</th>
+                            <th>Model</th>
+                            <th>Type</th>
+                            <th># Socket</th>
+                            <th>Core per Socket</th>
+                            <th>ST</th>
+                            <th>SMT2</th>
+                            <th>SMT4</th>
+                            <th>SMT8</th>
+                            <th>% Aplicado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,6 +134,7 @@
                         </tr>
                     </tfoot>
                 </table>
+
             </div>
         </div>
     </div>
@@ -89,6 +162,40 @@
             $('#metric').change(function() {
                 const selectedMetric = $(this).val();
                 updateTableHeaders(selectedMetric);
+            });
+
+            $('#generation').change(function() {
+                var generation = $(this).val();
+                $.ajax({
+                    url: '/get_servers',
+                    type: 'POST',
+                    data: {generation: generation},
+                    success: function(data) {
+                        var $serverSelect = $('#server');
+                        $serverSelect.empty();
+                        $serverSelect.append('<option value="" disabled selected>Seleccione un server</option>');
+                        $.each(data, function(index, value) {
+                            $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                        });
+                    }
+                });
+            });
+
+            $('#server').change(function() {
+                var server = $(this).val();
+                $.ajax({
+                    url: '/get_cores',
+                    type: 'POST',
+                    data: {server: server},
+                    success: function(data) {
+                        var $coresSelect = $('#cores');
+                        $coresSelect.empty();
+                        $coresSelect.append('<option value="" disabled selected>Seleccione cores</option>');
+                        $.each(data, function(index, value) {
+                            $coresSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                        });
+                    }
+                });
             });
 
             $('#add-button').click(function() {
@@ -144,7 +251,6 @@
                                 <td>${smt4}</td>
                                 <td>${smt8}</td>
                                 <td>${appliedPercentage}</td>
-                                <td><button type="button" class="btn btn-danger delete-row-button">Eliminar</button></td>
                             </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
@@ -156,22 +262,12 @@
                 });
             });
 
-            $('#clear-table-button').click(function() {
-                $('#configurations-table tbody').empty();
-                updateTotals();
-            });
-
-            $('#configurations-table').on('click', '.delete-row-button', function() {
-                $(this).closest('tr').remove();
-                updateTotals();
-            });
-
             function updateTableHeaders(selectedMetric) {
                 var headers = {
-                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado", "Acciones"],
-                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado", "Acciones"],
-                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado", "Acciones"],
-                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado", "Acciones"]
+                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado"],
+                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado"],
+                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado"],
+                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado"]
                 };
 
                 var selectedHeaders = headers[selectedMetric] || headers.rperf;
