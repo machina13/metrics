@@ -89,23 +89,23 @@ def save_configurations():
     for config in configurations:
         if 'st' in config:
             cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, st, smt2, smt4, smt8) VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['st'], config['smt2'], config['smt4'], config['smt8'])
+                'INSERT INTO configurations (generation, server, cores, st, smt2, smt4, smt8, percentage) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['st'], config['smt2'], config['smt4'], config['smt8'], config['percentage'])
             )
         elif 'sd_bench_saps' in config:
             cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, sd_bench_saps, hana_prod_saps) VALUES (%s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['sd_bench_saps'], config['hana_prod_saps'])
+                'INSERT INTO configurations (generation, server, cores, sd_bench_saps, hana_prod_saps, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['sd_bench_saps'], config['hana_prod_saps'], config['percentage'])
             )
         elif 'specrate2017_int_peak' in config:
             cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, specrate2017_int_peak, specrate2017_int_basek) VALUES (%s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['specrate2017_int_peak'], config['specrate2017_int_basek'])
+                'INSERT INTO configurations (generation, server, cores, specrate2017_int_peak, specrate2017_int_basek, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['specrate2017_int_peak'], config['specrate2017_int_basek'], config['percentage'])
             )
         elif 'cpw' in config:
             cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, cpw) VALUES (%s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['cpw'])
+                'INSERT INTO configurations (generation, server, cores, cpw, percentage) VALUES (%s, %s, %s, %s, %s)',
+                (config['generation'], config['server'], config['cores'], config['cpw'], config['percentage'])
             )
 
     conn.commit()
