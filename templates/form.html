@@ -157,17 +157,30 @@
             let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
 
             $('#configurations-table tbody tr').each(function() {
-                totalST += parseInt($(this).find('td').eq(8).text()) || 0;
-                totalSMT2 += parseInt($(this).find('td').eq(9).text()) || 0;
-                totalSMT4 += parseInt($(this).find('td').eq(10).text()) || 0;
-                totalSMT8 += parseInt($(this).find('td').eq(11).text()) || 0;
-                totalApplied += parseFloat($(this).find('td').eq(12).text()) || 0;
+                const row = $(this);
+                if ($('#metric').val() === 'rperf') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalSMT4 += parseInt(row.find('td').eq(10).text()) || 0;
+                    totalSMT8 += parseInt(row.find('td').eq(11).text()) || 0;
+                } else if ($('#metric').val() === 'saps') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                } else if ($('#metric').val() === 'spec') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                } else if ($('#metric').val() === 'cpw') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                }
             });
 
-            $('#total-st').text(totalST);
-            $('#total-smt2').text(totalSMT2);
-            $('#total-smt4').text(totalSMT4);
-            $('#total-smt8').text(totalSMT8);
+            $('#total-st').text($('#metric').val() === 'rperf' || $('#metric').val() === 'saps' || $('#metric').val() === 'spec' ? totalST : '0');
+            $('#total-smt2').text($('#metric').val() === 'rperf' ? totalSMT2 : '0');
+            $('#total-smt4').text($('#metric').val() === 'rperf' ? totalSMT4 : '0');
+            $('#total-smt8').text($('#metric').val() === 'rperf' ? totalSMT8 : '0');
             $('#total-applied').text(totalApplied.toFixed(2));
         }
 
@@ -175,6 +188,7 @@
             $('#metric').change(function() {
                 const selectedMetric = $(this).val();
                 updateTableHeaders(selectedMetric);
+                updateTotals();
             });
 
             $('#generation').change(function() {
@@ -188,7 +202,7 @@
                         $serverSelect.empty();
                         $serverSelect.append('<option value="" disabled selected>Seleccione un server</option>');
                         $.each(data, function(index, value) {
-                            $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                            $serverSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
                     }
                 });
@@ -205,75 +219,50 @@
                         $coresSelect.empty();
                         $coresSelect.append('<option value="" disabled selected>Seleccione cores</option>');
                         $.each(data, function(index, value) {
-                            $coresSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
+                            $coresSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
                     }
                 });
             });
 
             $('#add-button').click(function() {
-                var metric = $('#metric').val();
+                // Lógica para agregar una nueva fila a la tabla
+                // Recoge los datos del formulario
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
-                var percentage = $('#percentage').val();
-                var percentageColumn = $('#percentage-column').val();
-                if (!metric || !generation || !server || !cores || !percentage) {
-                    alert("Por favor complete todos los campos.");
-                    return;
-                }
+                var clock = "800"; // Ejemplo
+                var model = "ModeloX"; // Ejemplo
+                var type = "TipoY"; // Ejemplo
+                var socket = "4"; // Ejemplo
+                var coreperSocket = "8"; // Ejemplo
+                var st = "1000"; // Ejemplo
+                var smt2 = "2000"; // Ejemplo
+                var smt4 = "3000"; // Ejemplo
+                var smt8 = "4000"; // Ejemplo
+                var percentageApplied = "20"; // Ejemplo
 
-                $.ajax({
-                    url: '/get_metric_data',
-                    type: 'POST',
-                    data: {cores: cores, server: server, metric: metric},
-                    success: function(data) {
-                        if (data.length > 0) {
-                            var clock = data[0].clock || '';
-                            var model = data[0].model || '';
-                            var type = data[0].type || '';
-                            var socket = data[0].socket || '';
-                            var corepersocket = data[0].corepersocket || '';
-                            var sm = data[0].sm || '';
-                            var smt2 = data[0].smt2 || '';
-                            var smt4 = data[0].smt4 || '';
-                            var smt8 = data[0].smt8 || '';
+                var $tableBody = $('#configurations-table tbody');
+                var newRow = '<tr>' +
+                    '<td>' + generation + '</td>' +
+                    '<td>' + server + '</td>' +
+                    '<td>' + cores + '</td>' +
+                    '<td>' + clock + '</td>' +
+                    '<td>' + model + '</td>' +
+                    '<td>' + type + '</td>' +
+                    '<td>' + socket + '</td>' +
+                    '<td>' + coreperSocket + '</td>' +
+                    '<td>' + st + '</td>' +
+                    '<td>' + smt2 + '</td>' +
+                    '<td>' + smt4 + '</td>' +
+                    '<td>' + smt8 + '</td>' +
+                    '<td>' + percentageApplied + '</td>' +
+                    '<td><input type="checkbox" class="row-selector"></td>' +
+                    '</tr>';
 
-                            var appliedPercentage = 0;
-                            if (percentageColumn === 'ST') {
-                                appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT2') {
-                                appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT4') {
-                                appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT8') {
-                                appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
-                            }
+                $tableBody.append(newRow);
 
-                            var newRow = `<tr>
-                                <td>${generation}</td>
-                                <td>${server}</td>
-                                <td>${cores}</td>
-                                <td>${clock}</td>
-                                <td>${model}</td>
-                                <td>${type}</td>
-                                <td>${socket}</td>
-                                <td>${corepersocket}</td>
-                                <td>${sm}</td>
-                                <td>${smt2}</td>
-                                <td>${smt4}</td>
-                                <td>${smt8}</td>
-                                <td>${appliedPercentage}</td>
-                                <td><input type="checkbox" class="row-checkbox"></td>
-                            </tr>`;
-
-                            $('#configurations-table tbody').append(newRow);
-                            updateTotals();
-                        } else {
-                            alert("No se encontraron datos para las selecciones proporcionadas.");
-                        }
-                    }
-                });
+                updateTotals();
             });
 
             $('#clear-table').click(function() {
@@ -282,26 +271,33 @@
             });
 
             $('#delete-row').click(function() {
-                $('#configurations-table tbody input.row-checkbox:checked').closest('tr').remove();
+                $('#configurations-table tbody .row-selector:checked').closest('tr').remove();
                 updateTotals();
             });
 
-            function updateTableHeaders(selectedMetric) {
-                var headers = {
-                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado", "Seleccionar"],
-                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado", "Seleccionar"],
-                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado", "Seleccionar"],
-                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado", "Seleccionar"]
+            function updateTableHeaders(metric) {
+                const headers = {
+                    rperf: ['ST', 'SMT2', 'SMT4', 'SMT8'],
+                    saps: ['ST', 'SMT2', 'Aplicado'],
+                    spec: ['ST', 'SMT2', 'Aplicado'],
+                    cpw: ['ST', 'Aplicado']
                 };
 
-                var selectedHeaders = headers[selectedMetric] || headers.rperf;
-                $('#table-headers').empty();
-                selectedHeaders.forEach(function(header) {
-                    if (header) {
-                        $('#table-headers').append(`<th>${header}</th>`);
+                $('#table-headers th').each(function(index) {
+                    if (index >= 8 && index < 13) {
+                        $(this).text(headers[metric][index - 8] || '');
+                    }
+                });
+
+                $('#configurations-table tfoot th').each(function(index) {
+                    if (index >= 8 && index < 13) {
+                        $(this).text(headers[metric][index - 8] || 'Total');
                     }
                 });
             }
+
+            // Llamada inicial para asegurarse de que los totales se calculen correctamente al cargar la página.
+            updateTotals();
         });
     </script>
 </body>
