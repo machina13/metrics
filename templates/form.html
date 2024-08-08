@@ -28,6 +28,10 @@
         tfoot td {
             background-color: #e9ecef; /* Fondo para los datos de totales */
         }
+
+        .btn-container {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -100,7 +104,14 @@
                     </div>
                     <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
                 </form>
+
+                <!-- Botones para limpiar y eliminar -->
+                <div class="btn-container">
+                    <button type="button" id="clear-table" class="btn btn-warning">Limpiar Tabla</button>
+                    <button type="button" id="delete-row" class="btn btn-danger">Eliminar Fila Seleccionada</button>
+                </div>
             </div>
+
             <!-- Tabla -->
             <div class="table-container col-md-8">
                 <table id="configurations-table" class="table table-bordered">
@@ -119,6 +130,7 @@
                             <th>SMT4</th>
                             <th>SMT8</th>
                             <th>% Aplicado</th>
+                            <th>Seleccionar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -131,6 +143,7 @@
                             <th id="total-smt4">0</th>
                             <th id="total-smt8">0</th>
                             <th id="total-applied">0</th>
+                            <th></th>
                         </tr>
                     </tfoot>
                 </table>
@@ -251,6 +264,7 @@
                                 <td>${smt4}</td>
                                 <td>${smt8}</td>
                                 <td>${appliedPercentage}</td>
+                                <td><input type="checkbox" class="row-checkbox"></td>
                             </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
@@ -262,12 +276,22 @@
                 });
             });
 
+            $('#clear-table').click(function() {
+                $('#configurations-table tbody').empty();
+                updateTotals();
+            });
+
+            $('#delete-row').click(function() {
+                $('#configurations-table tbody input.row-checkbox:checked').closest('tr').remove();
+                updateTotals();
+            });
+
             function updateTableHeaders(selectedMetric) {
                 var headers = {
-                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado"],
-                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado"],
-                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado"],
-                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado"]
+                    rperf: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "ST", "SMT2", "SMT4", "SMT8", "% Aplicado", "Seleccionar"],
+                    saps: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SD-Bench SAPS", "HANA-Prod SAPS", "", "", "% Aplicado", "Seleccionar"],
+                    spec: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "SPECrate2017_int_peak", "SPECrate2017_init_basek", "", "", "% Aplicado", "Seleccionar"],
+                    cpw: ["Generación", "Server", "Cores", "Clock", "Model", "Type", "# Socket", "Core per Socket", "CPW", "", "", "", "% Aplicado", "Seleccionar"]
                 };
 
                 var selectedHeaders = headers[selectedMetric] || headers.rperf;
