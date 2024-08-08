@@ -155,88 +155,97 @@
 
     <script>
     $(document).ready(function() {
-        function updateTotals() {
-            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
+    function updateTotals() {
+        let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
 
-            $('#configurations-table tbody tr').each(function() {
-                const row = $(this);
-                if ($('#metric').val() === 'rperf') {
-                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                    totalSMT4 += parseInt(row.find('td').eq(10).text()) || 0;
-                    totalSMT8 += parseInt(row.find('td').eq(11).text()) || 0;
-                } else if ($('#metric').val() === 'saps') {
-                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-                } else if ($('#metric').val() === 'spec') {
-                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-                } else if ($('#metric').val() === 'cpw') {
-                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-                }
-            });
-
-            // Actualizar los totales basados en la métrica seleccionada
+        $('#configurations-table tbody tr').each(function() {
+            const row = $(this);
             if ($('#metric').val() === 'rperf') {
-                $('#total-col1').text(totalST);
-                $('#total-col2').text(totalSMT2);
-                $('#total-col3').text(totalSMT4);
-                $('#total-col4').text(totalSMT8);
-                $('#total-col5').text('0'); // Placeholder for any extra column if needed
+                totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                totalSMT4 += parseInt(row.find('td').eq(10).text()) || 0;
+                totalSMT8 += parseInt(row.find('td').eq(11).text()) || 0;
             } else if ($('#metric').val() === 'saps') {
-                $('#total-col1').text(totalST);
-                $('#total-col2').text(totalSMT2);
-                $('#total-col3').text('0'); // Placeholder for any extra column if needed
-                $('#total-col4').text('0'); // Placeholder for any extra column if needed
-                $('#total-col5').text(totalApplied.toFixed(2));
+                totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
             } else if ($('#metric').val() === 'spec') {
-                $('#total-col1').text(totalST);
-                $('#total-col2').text(totalSMT2);
-                $('#total-col3').text('0'); // Placeholder for any extra column if needed
-                $('#total-col4').text('0'); // Placeholder for any extra column if needed
-                $('#total-col5').text(totalApplied.toFixed(2));
+                totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
             } else if ($('#metric').val() === 'cpw') {
-                $('#total-col1').text(totalST);
-                $('#total-col2').text('0'); // Placeholder for any extra column if needed
-                $('#total-col3').text('0'); // Placeholder for any extra column if needed
-                $('#total-col4').text('0'); // Placeholder for any extra column if needed
-                $('#total-col5').text(totalApplied.toFixed(2));
-            } 
-        }
-
-        function updateTableHeaders(metric) {
-            const headers = {
-                rperf: ['ST', 'SMT2', 'SMT4', 'SMT8'],
-                saps: ['ST', 'SMT2', 'Aplicado'],
-                spec: ['ST', 'SMT2', 'Aplicado'],
-                cpw: ['ST', 'Aplicado']
-            };
-
-            $('#table-headers th').each(function(index) {
-                if (index >= 8 && index < 13) {
-                    $(this).text(headers[metric][index - 8] || '');
-                }
-            });
-
-            $('#total-row th').each(function(index) {
-                if (index >= 8 && index < 13) {
-                    $(this).text(headers[metric][index - 8] || 'Total');
-                }
-            });
-        }
-
-        $('#metric').change(function() {
-            const selectedMetric = $(this).val();
-            updateTableHeaders(selectedMetric);
-            updateTotals();
+                totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+            }
         });
 
-        // Inicializar totales al cargar la página
+        // Actualizar los totales basados en la métrica seleccionada
+        $('.total-col').hide();
+        if ($('#metric').val() === 'rperf') {
+            $('.total-st').text(totalST).show();
+            $('.total-smt2').text(totalSMT2).show();
+            $('.total-smt4').text(totalSMT4).show();
+            $('.total-smt8').text(totalSMT8).show();
+            $('.total-applied').text('0').show(); // Placeholder for any extra column if needed
+        } else if ($('#metric').val() === 'saps') {
+            $('.total-st').text(totalST).show();
+            $('.total-smt2').text(totalSMT2).show();
+            $('.total-smt4').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-smt8').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-applied').text(totalApplied.toFixed(2)).show();
+        } else if ($('#metric').val() === 'spec') {
+            $('.total-st').text(totalST).show();
+            $('.total-smt2').text(totalSMT2).show();
+            $('.total-smt4').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-smt8').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-applied').text(totalApplied.toFixed(2)).show();
+        } else if ($('#metric').val() === 'cpw') {
+            $('.total-st').text(totalST).show();
+            $('.total-smt2').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-smt4').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-smt8').text('0').show(); // Placeholder for any extra column if needed
+            $('.total-applied').text(totalApplied.toFixed(2)).show();
+        } else {
+            // Default case, if no metric is selected
+            $('.total-st').text('0').show();
+            $('.total-smt2').text('0').show();
+            $('.total-smt4').text('0').show();
+            $('.total-smt8').text('0').show();
+            $('.total-applied').text('0').show();
+        }
+    }
+
+    function updateTableHeaders(metric) {
+        const headers = {
+            rperf: ['ST', 'SMT2', 'SMT4', 'SMT8'],
+            saps: ['ST', 'SMT2', 'Aplicado'],
+            spec: ['ST', 'SMT2', 'Aplicado'],
+            cpw: ['ST', 'Aplicado']
+        };
+
+        $('#table-headers th').each(function(index) {
+            if (index >= 8 && index < 13) {
+                $(this).text(headers[metric][index - 8] || '');
+            }
+        });
+
+        $('#total-row th').each(function(index) {
+            if (index >= 8 && index < 13) {
+                $(this).text(headers[metric][index - 8] || 'Total');
+            }
+        });
+    }
+
+    $('#metric').change(function() {
+        const selectedMetric = $(this).val();
+        updateTableHeaders(selectedMetric);
         updateTotals();
     });
+
+    // Inicializar totales al cargar la página
+    updateTotals();
+});
+
 
         $(document).ready(function() {
             $('#metric').change(function() {
