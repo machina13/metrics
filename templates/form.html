@@ -9,13 +9,17 @@
     <style>
         .table-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
         }
-        .form-container, .table-container {
-            width: 40%;
+        .form-container {
+            width: 100%;
         }
         .table-container {
-            width: 60%;
+            width: 100%;
+        }
+        table {
+            width: 100%;
         }
     </style>
 </head>
@@ -118,7 +122,7 @@
                         </tr>
                     </tfoot>
                 </table>
-              
+                <button type="button" id="save-button" class="btn btn-success mt-3">Guardar</button>
             </div>
         </div>
     </div>
@@ -219,155 +223,78 @@
             });
 
             $('#add-button').click(function() {
-                var metric = $('#metric').val();
+                var form = $('#main-form')[0];
+                if (form.checkValidity() === false) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.remove('was-validated');
+
+                var selectedMetric = $('#metric').val();
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
                 var percentage = $('#percentage').val();
                 var percentageColumn = $('#percentage-column').val();
-                if (!metric || !generation || !server || !cores || !percentage) {
-                    alert("Por favor complete todos los campos.");
-                    return;
+
+                var st = 0, smt2 = 0, smt4 = 0, smt8 = 0;
+
+                if (selectedMetric === 'rperf') {
+                    if (percentageColumn === 'ST') {
+                        st = parseInt(percentage);
+                    } else if (percentageColumn === 'SMT2') {
+                        smt2 = parseInt(percentage);
+                    } else if (percentageColumn === 'SMT4') {
+                        smt4 = parseInt(percentage);
+                    } else if (percentageColumn === 'SMT8') {
+                        smt8 = parseInt(percentage);
+                    }
                 }
 
-                $.ajax({
-                    url: '/get_metric_data',
-                    type: 'POST',
-                    data: {cores: cores, server: server, metric: metric},
-                    success: function(data) {
-                        if (data.length > 0) {
-                            var newRow;
-                            if (metric === 'rperf') {
-                                var sm = data[0].sm || '';
-                                var smt2 = data[0].smt2 || '';
-                                var smt4 = data[0].smt4 || '';
-                                var smt8 = data[0].smt8 || '';
+                var newRow = `
+                    <tr>
+                        <td>${generation}</td>
+                        <td>${server}</td>
+                        <td>${cores}</td>
+                        <td>${st}</td>
+                        <td>${smt2}</td>
+                        <td>${smt4}</td>
+                        <td>${smt8}</td>
+                        <td>${percentage}</td>
+                    </tr>`;
 
-                                var appliedPercentage = 0;
-                                if (percentageColumn === 'ST') {
-                                    appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
-                                } else if (percentageColumn === 'SMT2') {
-                                    appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
-                                } else if (percentageColumn === 'SMT4') {
-                                    appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
-                                } else if (percentageColumn === 'SMT8') {
-                                    appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
-                                }
-
-                                newRow = `<tr>
-                                    <td>${generation}</td>
-                                    <td>${server}</td>
-                                    <td>${cores}</td>
-                                    <td>${sm}</td>
-                                    <td>${smt2}</td>
-                                    <td>${smt4}</td>
-                                    <td>${smt8}</td>
-                                    <td>${appliedPercentage}</td>
-                                </tr>`;
-                            } else if (metric === 'saps') {
-                                var sdBenchSAPS = data[0].sdBenchSAPS || '';
-                                var hanaProdSAPS = data[0].hanaProdSAPS || '';
-
-                                var appliedPercentage = (parseFloat(hanaProdSAPS) * (parseFloat(percentage) / 100)).toFixed(2);
-
-                                newRow = `<tr>
-                                    <td>${generation}</td>
-                                    <td>${server}</td>
-                                    <td>${cores}</td>
-                                    <td>${sdBenchSAPS}</td>
-                                    <td>${hanaProdSAPS}</td>
-                                    <td>${appliedPercentage}</td>
-                                </tr>`;
-                            } else if (metric === 'spec') {
-                                var specRatePeak = data[0].specRatePeak || '';
-                                var specRateBase = data[0].specRateBase || '';
-
-                                var appliedPercentage = (parseFloat(specRatePeak) * (parseFloat(percentage) / 100)).toFixed(2);
-
-                                newRow = `<tr>
-                                    <td>${generation}</td>
-                                    <td>${server}</td>
-                                    <td>${cores}</td>
-                                    <td>${specRatePeak}</td>
-                                    <td>${specRateBase}</td>
-                                    <td>${appliedPercentage}</td>
-                                </tr>`;
-                            } else if (metric === 'cpw') {
-                                var cpw = data[0].cpw || '';
-
-                                var appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
-
-                                newRow = `<tr>
-                                    <td>${generation}</td>
-                                    <td>${server}</td>
-                                    <td>${cores}</td>
-                                    <td>${cpw}</td>
-                                    <td>${appliedPercentage}</td>
-                                </tr>`;
-                            }
-
-                            $('#configurations-table tbody').append(newRow);
-                            updateTotals();
-                        } else {
-                            alert("No se encontraron datos para las selecciones proporcionadas.");
-                        }
-                    }
-                });
+                $('#configurations-table tbody').append(newRow);
+                updateTotals();
             });
 
             $('#save-button').click(function() {
                 var configurations = [];
 
                 $('#configurations-table tbody tr').each(function() {
-                    var row = $(this).find('td').map(function() {
-                        return $(this).text();
-                    }).get();
-
-                    configurations.push({
-                        generation: row[0],
-                        server: row[1],
-                        cores: row[2],
-                        metricData1: row[3],
-                        metricData2: row[4] || '',
-                        metricData3: row[5] || '',
-                        metricData4: row[6] || '',
-                        percentageApplied: row[7]
-                    });
+                    var row = $(this);
+                    var configuration = {
+                        generation: row.find('td').eq(0).text(),
+                        server: row.find('td').eq(1).text(),
+                        cores: row.find('td').eq(2).text(),
+                        st: row.find('td').eq(3).text(),
+                        smt2: row.find('td').eq(4).text(),
+                        smt4: row.find('td').eq(5).text(),
+                        smt8: row.find('td').eq(6).text(),
+                        percentage: row.find('td').eq(7).text()
+                    };
+                    configurations.push(configuration);
                 });
 
                 $.ajax({
-                    url: '/add_configuration',
+                    url: '/save_configurations',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(configurations),
                     success: function(response) {
-                        if (response.status === 'success') {
-                            alert('Registros guardados exitosamente.');
-                            $('#configurations-table tbody').empty();
-                            updateTotals();
-                        } else {
-                            alert('Error al guardar los registros.');
-                        }
+                        alert('Configuraciones guardadas correctamente');
                     }
                 });
             });
-
-            // Validación del formulario
-            (function() {
-                'use strict';
-                window.addEventListener('load', function() {
-                    var forms = document.getElementsByClassName('needs-validation');
-                    var validation = Array.prototype.filter.call(forms, function(form) {
-                        form.addEventListener('submit', function(event) {
-                            if (form.checkValidity() === false) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
-                            form.classList.add('was-validated');
-                        }, false);
-                    });
-                }, false);
-            })();
         });
     </script>
 </body>
