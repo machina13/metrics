@@ -93,15 +93,12 @@
                         <label for="percentage-column">Aplicar % a:</label>
                         <select id="percentage-column" name="percentage-column" class="form-control" required>
                             <option value="" disabled selected>Seleccione una columna</option>
-                            <option value="ST">ST</option>
-                            <option value="SMT2">SMT2</option>
-                            <option value="SMT4">SMT4</option>
-                            <option value="SMT8">SMT8</option>
                         </select>
                         <div class="invalid-feedback">
                             Por favor, seleccione una columna.
                         </div>
                     </div>
+
                     <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
                 </form>
 
@@ -172,6 +169,36 @@
         }
 
         $(document).ready(function() {
+          function updatePercentageOptions(metric) {
+               const options = {
+                   rperf: [
+                       { value: 'ST', text: 'ST' },
+                       { value: 'SMT2', text: 'SMT2' },
+                       { value: 'SMT4', text: 'SMT4' },
+                       { value: 'SMT8', text: 'SMT8' }
+                   ],
+                   saps: [
+                       { value: 'SD-Bench SAPS', text: 'SD-Bench SAPS' },
+                       { value: 'HANA-Prod SAPS', text: 'HANA-Prod SAPS' }
+                   ],
+                   spec: [
+                       { value: 'SPECrate2017_int_peak', text: 'SPECrate2017_int_peak' },
+                       { value: 'SPECrate2017_init_basek', text: 'SPECrate2017_init_basek' }
+                   ],
+                   cpw: [
+                       { value: 'CPW', text: 'CPW' }
+                   ]
+               };
+
+               const selectedOptions = options[metric] || [];
+               const $percentageColumn = $('#percentage-column');
+               $percentageColumn.empty();
+               $percentageColumn.append('<option value="" disabled selected>Seleccione una columna</option>');
+
+               selectedOptions.forEach(option => {
+                   $percentageColumn.append(`<option value="${option.value}">${option.text}</option>`);
+               });
+           }
             $('#metric').change(function() {
                 const selectedMetric = $(this).val();
                 updateTableHeaders(selectedMetric);
