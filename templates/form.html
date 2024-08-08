@@ -153,48 +153,36 @@
     </div>
 
     <script>
-    function updateTotals() {
-        let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
+        function updateTotals() {
+            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
 
-        $('#configurations-table tbody tr').each(function() {
-            const row = $(this);
-            if ($('#metric').val() === 'rperf') {
-                totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                totalSMT4 += parseInt(row.find('td').eq(10).text()) || 0;
-                totalSMT8 += parseInt(row.find('td').eq(11).text()) || 0;
-            } else if ($('#metric').val() === 'saps') {
-                totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-            } else if ($('#metric').val() === 'spec') {
-                totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
-                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-            } else if ($('#metric').val() === 'cpw') {
-                totalST += parseInt(row.find('td').eq(8).text()) || 0;
-                totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
-            }
-        });
+            $('#configurations-table tbody tr').each(function() {
+                const row = $(this);
+                if ($('#metric').val() === 'rperf') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalSMT4 += parseInt(row.find('td').eq(10).text()) || 0;
+                    totalSMT8 += parseInt(row.find('td').eq(11).text()) || 0;
+                } else if ($('#metric').val() === 'saps') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                } else if ($('#metric').val() === 'spec') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalSMT2 += parseInt(row.find('td').eq(9).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                } else if ($('#metric').val() === 'cpw') {
+                    totalST += parseInt(row.find('td').eq(8).text()) || 0;
+                    totalApplied += parseFloat(row.find('td').eq(13).text()) || 0;
+                }
+            });
 
-        $('#total-st').text($('#metric').val() === 'rperf' || $('#metric').val() === 'saps' || $('#metric').val() === 'spec' ? totalST : '0');
-        $('#total-smt2').text($('#metric').val() === 'rperf' ? totalSMT2 : '0');
-        $('#total-smt4').text($('#metric').val() === 'rperf' ? totalSMT4 : '0');
-        $('#total-smt8').text($('#metric').val() === 'rperf' ? totalSMT8 : '0');
-        $('#total-applied').text(totalApplied.toFixed(2));
-    }
-
-    $(document).ready(function() {
-        $('#metric').change(function() {
-            const selectedMetric = $(this).val();
-            updateTableHeaders(selectedMetric);
-            updateTotals();
-        });
-
-        // Llamada inicial para asegurarse de que los totales se calculen correctamente al cargar la página.
-        updateTotals();
-    });
-
+            $('#total-st').text($('#metric').val() === 'rperf' || $('#metric').val() === 'saps' || $('#metric').val() === 'spec' ? totalST : '0');
+            $('#total-smt2').text($('#metric').val() === 'rperf' ? totalSMT2 : '0');
+            $('#total-smt4').text($('#metric').val() === 'rperf' ? totalSMT4 : '0');
+            $('#total-smt8').text($('#metric').val() === 'rperf' ? totalSMT8 : '0');
+            $('#total-applied').text(totalApplied.toFixed(2));
+        }
 
         $(document).ready(function() {
             $('#metric').change(function() {
