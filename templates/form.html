@@ -223,66 +223,82 @@
             });
 
             $('#add-button').click(function() {
-                var form = $('#main-form')[0];
-                if (form.checkValidity() === false) {
-                    form.classList.add('was-validated');
-                    return;
-                }
-                form.classList.remove('was-validated');
-
-                var selectedMetric = $('#metric').val();
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
+                var metric = $('#metric').val();
                 var percentage = $('#percentage').val();
                 var percentageColumn = $('#percentage-column').val();
 
                 var st = 0, smt2 = 0, smt4 = 0, smt8 = 0;
 
-                if (selectedMetric === 'rperf') {
-                    if (percentageColumn === 'ST') {
-                        st = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT2') {
-                        smt2 = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT4') {
-                        smt4 = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT8') {
-                        smt8 = parseInt(percentage);
+                // Obtener los valores correctos según la métrica seleccionada
+                $.ajax({
+                    url: '/get_metric_values',
+                    type: 'POST',
+                    data: {
+                        metric: metric,
+                        generation: generation,
+                        server: server,
+                        cores: cores
+                    },
+                    success: function(data) {
+                        if (metric === 'rperf') {
+                            st = data.st;
+                            smt2 = data.smt2;
+                            smt4 = data.smt4;
+                            smt8 = data.smt8;
+                        } else if (metric === 'saps') {
+                            st = data.sd_bench_saps;
+                            smt2 = data.hana_prod_saps;
+                        } else if (metric === 'spec') {
+                            st = data.spec_int_peak;
+                            smt2 = data.spec_int_basek;
+                        } else if (metric === 'cpw') {
+                            st = data.cpw;
+                        }
+
+                        var appliedValue = 0;
+                        if (percentageColumn === 'ST') {
+                            appliedValue = st * (percentage / 100);
+                        } else if (percentageColumn === 'SMT2') {
+                            appliedValue = smt2 * (percentage / 100);
+                        } else if (percentageColumn === 'SMT4') {
+                            appliedValue = smt4 * (percentage / 100);
+                        } else if (percentageColumn === 'SMT8') {
+                            appliedValue = smt8 * (percentage / 100);
+                        }
+
+                        var newRow = `<tr>
+                            <td>${generation}</td>
+                            <td>${server}</td>
+                            <td>${cores}</td>
+                            <td>${st}</td>
+                            <td>${smt2}</td>
+                            <td>${smt4}</td>
+                            <td>${smt8}</td>
+                            <td>${appliedValue.toFixed(2)}</td>
+                        </tr>`;
+                        $('#configurations-table tbody').append(newRow);
+                        updateTotals();
                     }
-                }
-
-                var newRow = `
-                    <tr>
-                        <td>${generation}</td>
-                        <td>${server}</td>
-                        <td>${cores}</td>
-                        <td>${st}</td>
-                        <td>${smt2}</td>
-                        <td>${smt4}</td>
-                        <td>${smt8}</td>
-                        <td>${percentage}</td>
-                    </tr>`;
-
-                $('#configurations-table tbody').append(newRow);
-                updateTotals();
+                });
             });
 
             $('#save-button').click(function() {
                 var configurations = [];
-
                 $('#configurations-table tbody tr').each(function() {
-                    var row = $(this);
-                    var configuration = {
-                        generation: row.find('td').eq(0).text(),
-                        server: row.find('td').eq(1).text(),
-                        cores: row.find('td').eq(2).text(),
-                        st: row.find('td').eq(3).text(),
-                        smt2: row.find('td').eq(4).text(),
-                        smt4: row.find('td').eq(5).text(),
-                        smt8: row.find('td').eq(6).text(),
-                        percentage: row.find('td').eq(7).text()
+                    var row = {
+                        generation: $(this).find('td').eq(0).text(),
+                        server: $(this).find('td').eq(1).text(),
+                        cores: $(this).find('td').eq(2).text(),
+                        st: $(this).find('td').eq(3).text(),
+                        smt2: $(this).find('td').eq(4).text(),
+                        smt4: $(this).find('td').eq(5).text(),
+                        smt8: $(this).find('td').eq(6).text(),
+                        appliedValue: $(this).find('td').eq(7).text()
                     };
-                    configurations.push(configuration);
+                    configurations.push(row);
                 });
 
                 $.ajax({
@@ -291,7 +307,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(configurations),
                     success: function(response) {
-                        alert('Configuraciones guardadas correctamente');
+                        alert(response.message);
                     }
                 });
             });
