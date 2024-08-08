@@ -133,16 +133,23 @@
                     <tbody>
                     </tbody>
                     <tfoot>
-                        <tr>
+                        <tr id="total-row">
                             <th colspan="8">Total</th>
-                            <th id="total-st">0</th>
-                            <th id="total-smt2">0</th>
-                            <th id="total-smt4">0</th>
-                            <th id="total-smt8">0</th>
+                            <!-- Las celdas de totales están inicialmente vacías -->
+                            <th id="total-st" class="metric-total">0</th>
+                            <th id="total-smt2" class="metric-total">0</th>
+                            <th id="total-smt4" class="metric-total">0</th>
+                            <th id="total-smt8" class="metric-total">0</th>
+                            <th id="total-saps1" class="metric-total">0</th>
+                            <th id="total-saps2" class="metric-total">0</th>
+                            <th id="total-spec1" class="metric-total">0</th>
+                            <th id="total-spec2" class="metric-total">0</th>
+                            <th id="total-cpw" class="metric-total">0</th>
                             <th id="total-applied">0</th>
                             <th></th>
                         </tr>
                     </tfoot>
+
                 </table>
 
             </div>
@@ -150,23 +157,46 @@
     </div>
 
     <script>
-        function updateTotals() {
-            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
+    function updateTotals() {
+        let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0;
+        let totalSaps1 = 0, totalSaps2 = 0;
+        let totalSpec1 = 0, totalSpec2 = 0;
+        let totalCpw = 0, totalApplied = 0;
 
-            $('#configurations-table tbody tr').each(function() {
-                totalST += parseInt($(this).find('td').eq(8).text()) || 0;
-                totalSMT2 += parseInt($(this).find('td').eq(9).text()) || 0;
-                totalSMT4 += parseInt($(this).find('td').eq(10).text()) || 0;
-                totalSMT8 += parseInt($(this).find('td').eq(11).text()) || 0;
-                totalApplied += parseFloat($(this).find('td').eq(12).text()) || 0;
-            });
+        $('#configurations-table tbody tr').each(function() {
+            // Total por métricas
+            totalST += parseInt($(this).find('td').eq(8).text()) || 0;
+            totalSMT2 += parseInt($(this).find('td').eq(9).text()) || 0;
+            totalSMT4 += parseInt($(this).find('td').eq(10).text()) || 0;
+            totalSMT8 += parseInt($(this).find('td').eq(11).text()) || 0;
 
-            $('#total-st').text(totalST);
-            $('#total-smt2').text(totalSMT2);
-            $('#total-smt4').text(totalSMT4);
-            $('#total-smt8').text(totalSMT8);
-            $('#total-applied').text(totalApplied.toFixed(2));
-        }
+            totalSaps1 += parseFloat($(this).find('td').eq(9).text()) || 0;
+            totalSaps2 += parseFloat($(this).find('td').eq(10).text()) || 0;
+
+            totalSpec1 += parseFloat($(this).find('td').eq(9).text()) || 0;
+            totalSpec2 += parseFloat($(this).find('td').eq(10).text()) || 0;
+
+            totalCpw += parseFloat($(this).find('td').eq(9).text()) || 0;
+
+            totalApplied += parseFloat($(this).find('td').eq(12).text()) || 0;
+        });
+
+        // Actualizar los valores del pie de tabla
+        $('#total-st').text(totalST);
+        $('#total-smt2').text(totalSMT2);
+        $('#total-smt4').text(totalSMT4);
+        $('#total-smt8').text(totalSMT8);
+
+        $('#total-saps1').text(totalSaps1);
+        $('#total-saps2').text(totalSaps2);
+
+        $('#total-spec1').text(totalSpec1);
+        $('#total-spec2').text(totalSpec2);
+
+        $('#total-cpw').text(totalCpw);
+
+        $('#total-applied').text(totalApplied.toFixed(2));
+    }
 
         $(document).ready(function() {
           function updatePercentageOptions(metric) {
@@ -329,6 +359,25 @@
                         $('#table-headers').append(`<th>${header}</th>`);
                     }
                 });
+
+                // Mostrar u ocultar las celdas del pie de tabla según la métrica
+                $('.metric-total').hide();
+                if (selectedMetric === 'rperf') {
+                    $('#total-st').show();
+                    $('#total-smt2').show();
+                    $('#total-smt4').show();
+                    $('#total-smt8').show();
+                } else if (selectedMetric === 'saps') {
+                    $('#total-saps1').show();
+                    $('#total-saps2').show();
+                } else if (selectedMetric === 'spec') {
+                    $('#total-spec1').show();
+                    $('#total-spec2').show();
+                } else if (selectedMetric === 'cpw') {
+                    $('#total-cpw').show();
+                }
+
+                updateTotals();
             }
         });
     </script>
