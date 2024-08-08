@@ -72,7 +72,7 @@ def get_metric_data():
     # Consulta la métrica específica
     metric_query = {
         'rperf': "SELECT st, smt2, smt4, smt8 FROM rperf WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
-        'saps': "SELECT SD-bench, HANA-Prod FROM saps WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
+        'saps': "SELECT sd_bench, hana_prod_saps FROM saps WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
         'spec': "SELECT specrate2017_int_peak, specrate2017_int_basek FROM spec WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
         'cpw': "SELECT cpw FROM cpw WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)"
     }
