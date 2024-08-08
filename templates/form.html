@@ -4,28 +4,39 @@
     <meta charset="UTF-8">
     <title>Formulario</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .form-container {
-            max-width: 400px;
-            margin-right: 20px;
-        }
-        .table-container {
-            flex-grow: 1;
-        }
-        .row {
-            display: flex;
-            flex-wrap: nowrap;
-        }
-    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-container, .table-container {
+            width: 40%;
+        }
+        .table-container {
+            width: 60%;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
         <div class="row">
             <!-- Formulario -->
-            <div class="form-container">
+            <div class="form-container col-md-4">
                 <form id="main-form" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="metric">Métrica de Cómputo:</label>
+                        <select id="metric" name="metric" class="form-control" required>
+                            <option value="rperf">rperf</option>
+                            <option value="saps">saps</option>
+                            <option value="spec">spec</option>
+                            <option value="cpw">cpw</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor, seleccione una métrica de cómputo.
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="generation">Generación:</label>
                         <select id="generation" name="generation" class="form-control" required>
@@ -57,7 +68,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="percentage">% Utilizacion:</label>
+                        <label for="percentage">% Utilización:</label>
                         <input type="number" id="percentage" name="percentage" class="form-control" required>
                         <div class="invalid-feedback">
                             Por favor, ingrese un porcentaje.
@@ -80,10 +91,10 @@
                 </form>
             </div>
             <!-- Tabla -->
-            <div class="table-container">
+            <div class="table-container col-md-8">
                 <table id="configurations-table" class="table table-bordered">
                     <thead>
-                        <tr>
+                        <tr id="table-headers">
                             <th>Generación</th>
                             <th>Server</th>
                             <th>Cores</th>
@@ -103,7 +114,7 @@
                             <th id="total-smt2">0</th>
                             <th id="total-smt4">0</th>
                             <th id="total-smt8">0</th>
-                            <th id="total-applied-percentage">0</th>
+                            <th id="total-applied">0</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -114,24 +125,65 @@
 
     <script>
         function updateTotals() {
-            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalAppliedPercentage = 0;
+            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
 
             $('#configurations-table tbody tr').each(function() {
                 totalST += parseInt($(this).find('td').eq(3).text()) || 0;
                 totalSMT2 += parseInt($(this).find('td').eq(4).text()) || 0;
                 totalSMT4 += parseInt($(this).find('td').eq(5).text()) || 0;
                 totalSMT8 += parseInt($(this).find('td').eq(6).text()) || 0;
-                totalAppliedPercentage += parseFloat($(this).find('td').eq(7).text()) || 0;
+                totalApplied += parseFloat($(this).find('td').eq(7).text()) || 0;
             });
 
             $('#total-st').text(totalST);
             $('#total-smt2').text(totalSMT2);
             $('#total-smt4').text(totalSMT4);
             $('#total-smt8').text(totalSMT8);
-            $('#total-applied-percentage').text(totalAppliedPercentage.toFixed(2));
+            $('#total-applied').text(totalApplied.toFixed(2));
+        }
+
+        function updateTableHeaders(metric) {
+            const headers = {
+                rperf: `
+                    <th>Generación</th>
+                    <th>Server</th>
+                    <th>Cores</th>
+                    <th>ST</th>
+                    <th>SMT2</th>
+                    <th>SMT4</th>
+                    <th>SMT8</th>
+                    <th>% Aplicado</th>`,
+                saps: `
+                    <th>Generación</th>
+                    <th>Server</th>
+                    <th>Cores</th>
+                    <th>SD-Bench SAPS</th>
+                    <th>HANA-Prod SAPS</th>
+                    <th>% Aplicado</th>`,
+                spec: `
+                    <th>Generación</th>
+                    <th>Server</th>
+                    <th>Cores</th>
+                    <th>SPECrate2017_int_peak</th>
+                    <th>SPECrate2017_int_basek</th>
+                    <th>% Aplicado</th>`,
+                cpw: `
+                    <th>Generación</th>
+                    <th>Server</th>
+                    <th>Cores</th>
+                    <th>CPW</th>
+                    <th>% Aplicado</th>`
+            };
+
+            $('#table-headers').html(headers[metric]);
         }
 
         $(document).ready(function() {
+            $('#metric').change(function() {
+                const selectedMetric = $(this).val();
+                updateTableHeaders(selectedMetric);
+            });
+
             $('#generation').change(function() {
                 var generation = $(this).val();
                 $.ajax({
@@ -167,49 +219,92 @@
             });
 
             $('#add-button').click(function() {
+                var metric = $('#metric').val();
                 var generation = $('#generation').val();
                 var server = $('#server').val();
                 var cores = $('#cores').val();
                 var percentage = $('#percentage').val();
                 var percentageColumn = $('#percentage-column').val();
-
-                if (!generation || !server || !cores || !percentage || !percentageColumn) {
+                if (!metric || !generation || !server || !cores || !percentage) {
                     alert("Por favor complete todos los campos.");
                     return;
                 }
 
                 $.ajax({
-                    url: '/get_smt',
+                    url: '/get_metric_data',
                     type: 'POST',
-                    data: {cores: cores, server: server},
-                    success: function(smtData) {
-                        if (smtData.length > 0) {
-                            var sm = smtData[0].sm || '';
-                            var smt2 = smtData[0].smt2 || '';
-                            var smt4 = smtData[0].smt4 || '';
-                            var smt8 = smtData[0].smt8 || '';
+                    data: {cores: cores, server: server, metric: metric},
+                    success: function(data) {
+                        if (data.length > 0) {
+                            var newRow;
+                            if (metric === 'rperf') {
+                                var sm = data[0].sm || '';
+                                var smt2 = data[0].smt2 || '';
+                                var smt4 = data[0].smt4 || '';
+                                var smt8 = data[0].smt8 || '';
 
-                            var appliedPercentage = 0;
-                            if (percentageColumn === 'ST') {
-                                appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT2') {
-                                appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT4') {
-                                appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT8') {
-                                appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
+                                var appliedPercentage = 0;
+                                if (percentageColumn === 'ST') {
+                                    appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT2') {
+                                    appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT4') {
+                                    appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT8') {
+                                    appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${sm}</td>
+                                    <td>${smt2}</td>
+                                    <td>${smt4}</td>
+                                    <td>${smt8}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'saps') {
+                                var sdBenchSAPS = data[0].sdBenchSAPS || '';
+                                var hanaProdSAPS = data[0].hanaProdSAPS || '';
+
+                                var appliedPercentage = (parseFloat(hanaProdSAPS) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${sdBenchSAPS}</td>
+                                    <td>${hanaProdSAPS}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'spec') {
+                                var specRatePeak = data[0].specRatePeak || '';
+                                var specRateBase = data[0].specRateBase || '';
+
+                                var appliedPercentage = (parseFloat(specRatePeak) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${specRatePeak}</td>
+                                    <td>${specRateBase}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
+                            } else if (metric === 'cpw') {
+                                var cpw = data[0].cpw || '';
+
+                                var appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
+
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${cpw}</td>
+                                    <td>${appliedPercentage}</td>
+                                </tr>`;
                             }
-
-                            var newRow = `<tr>
-                                <td>${generation}</td>
-                                <td>${server}</td>
-                                <td>${cores}</td>
-                                <td>${sm}</td>
-                                <td>${smt2}</td>
-                                <td>${smt4}</td>
-                                <td>${smt8}</td>
-                                <td>${appliedPercentage}</td>
-                            </tr>`;
 
                             $('#configurations-table tbody').append(newRow);
                             updateTotals();
@@ -232,10 +327,10 @@
                         generation: row[0],
                         server: row[1],
                         cores: row[2],
-                        sm: row[3],
-                        smt2: row[4],
-                        smt4: row[5],
-                        smt8: row[6],
+                        metricData1: row[3],
+                        metricData2: row[4] || '',
+                        metricData3: row[5] || '',
+                        metricData4: row[6] || '',
                         percentageApplied: row[7]
                     });
                 });
