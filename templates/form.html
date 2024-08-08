@@ -7,15 +7,26 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-        .table-container {
-            display: flex;
-            justify-content: space-between;
+    .table-container {
+            margin: 0 auto; /* Centra la tabla dentro de su contenedor */
         }
-        .form-container, .table-container {
-            width: 40%;
+
+        table {
+            width: 100%; /* Asegura que la tabla ocupe todo el ancho del contenedor */
+            border-collapse: collapse; /* Elimina espacios entre bordes de celdas */
         }
-        .table-container {
-            width: 60%;
+
+        th, td {
+            padding: 8px; /* Espaciado interno de celdas */
+            text-align: center; /* Alineación del texto */
+        }
+
+        tfoot th {
+            background-color: #f8f9fa; /* Fondo para la fila de totales */
+        }
+
+        tfoot td {
+            background-color: #e9ecef; /* Fondo para los datos de totales */
         }
     </style>
 </head>
