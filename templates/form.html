@@ -1,297 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Formulario</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Server Configuration</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .table-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .form-container {
-            width: 100%;
-        }
-        .table-container {
-            width: 100%;
-        }
-        table {
-            width: 100%;
-        }
-    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="row">
-            <!-- Formulario -->
-            <div class="form-container col-md-4">
-                <form id="main-form" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="metric">Métrica de Cómputo:</label>
-                        <select id="metric" name="metric" class="form-control" required>
-                            <option value="rperf">rperf</option>
-                            <option value="saps">saps</option>
-                            <option value="spec">spec</option>
-                            <option value="cpw">cpw</option>
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, seleccione una métrica de cómputo.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="generation">Generación:</label>
-                        <select id="generation" name="generation" class="form-control" required>
-                            <option value="" disabled selected>Seleccione una generación</option>
-                            {% for gen in generation %}
-                                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, seleccione una generación.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="server">Server:</label>
-                        <select id="server" name="server" class="form-control" required>
-                            <option value="" disabled selected>Seleccione un server</option>
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, seleccione un server.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="cores">Cores:</label>
-                        <select id="cores" name="cores" class="form-control" required>
-                            <option value="" disabled selected>Seleccione cores</option>
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, seleccione cores.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="percentage">% Utilización:</label>
-                        <input type="number" id="percentage" name="percentage" class="form-control" required>
-                        <div class="invalid-feedback">
-                            Por favor, ingrese un porcentaje.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="percentage-column">Aplicar % a:</label>
-                        <select id="percentage-column" name="percentage-column" class="form-control" required>
-                            <option value="" disabled selected>Seleccione una columna</option>
-                            <option value="ST">ST</option>
-                            <option value="SMT2">SMT2</option>
-                            <option value="SMT4">SMT4</option>
-                            <option value="SMT8">SMT8</option>
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, seleccione una columna.
-                        </div>
-                    </div>
-                    <button type="button" id="add-button" class="btn btn-primary">Agregar</button>
-                </form>
-            </div>
-            <!-- Tabla -->
-            <div class="table-container col-md-8">
-                <table id="configurations-table" class="table table-bordered">
-                    <thead>
-                        <tr id="table-headers">
-                            <th>Generación</th>
-                            <th>Server</th>
-                            <th>Cores</th>
-                            <th>ST</th>
-                            <th>SMT2</th>
-                            <th>SMT4</th>
-                            <th>SMT8</th>
-                            <th>% Aplicado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3">Total</th>
-                            <th id="total-st">0</th>
-                            <th id="total-smt2">0</th>
-                            <th id="total-smt4">0</th>
-                            <th id="total-smt8">0</th>
-                            <th id="total-applied">0</th>
-                        </tr>
-                    </tfoot>
-                </table>
-                <button type="button" id="save-button" class="btn btn-success mt-3">Guardar</button>
-            </div>
-        </div>
-    </div>
+    <h1>Server Configuration</h1>
+    <form id="serverForm">
+        <label for="generation">Generation:</label>
+        <select id="generation" name="generation">
+            {% for gen in generation %}
+                <option value="{{ gen[0] }}">{{ gen[0] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="server">Server:</label>
+        <select id="server" name="server"></select>
+
+        <label for="cores">Cores:</label>
+        <select id="cores" name="cores"></select>
+
+        <label for="metric">Metric:</label>
+        <select id="metric" name="metric">
+            <option value="rperf">rperf</option>
+            <option value="saps">saps</option>
+            <option value="spec">spec</option>
+            <option value="cpw">cpw</option>
+        </select>
+
+        <div id="metricData"></div>
+        <button type="button" id="addServer">Add Server</button>
+    </form>
+
+    <table id="serverTable" border="1">
+        <thead>
+            <tr>
+                <th>Generation</th>
+                <th>Server</th>
+                <th>Cores</th>
+                <th id="metricColumns">Metric Data</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button type="button" id="saveConfigurations">Save Configurations</button>
 
     <script>
-        function updateTotals() {
-            let totalST = 0, totalSMT2 = 0, totalSMT4 = 0, totalSMT8 = 0, totalApplied = 0;
-
-            $('#configurations-table tbody tr').each(function() {
-                totalST += parseInt($(this).find('td').eq(3).text()) || 0;
-                totalSMT2 += parseInt($(this).find('td').eq(4).text()) || 0;
-                totalSMT4 += parseInt($(this).find('td').eq(5).text()) || 0;
-                totalSMT8 += parseInt($(this).find('td').eq(6).text()) || 0;
-                totalApplied += parseFloat($(this).find('td').eq(7).text()) || 0;
-            });
-
-            $('#total-st').text(totalST);
-            $('#total-smt2').text(totalSMT2);
-            $('#total-smt4').text(totalSMT4);
-            $('#total-smt8').text(totalSMT8);
-            $('#total-applied').text(totalApplied.toFixed(2));
-        }
-
-        function updateTableHeaders(metric) {
-            const headers = {
-                rperf: `
-                    <th>Generación</th>
-                    <th>Server</th>
-                    <th>Cores</th>
-                    <th>ST</th>
-                    <th>SMT2</th>
-                    <th>SMT4</th>
-                    <th>SMT8</th>
-                    <th>% Aplicado</th>`,
-                saps: `
-                    <th>Generación</th>
-                    <th>Server</th>
-                    <th>Cores</th>
-                    <th>SD-Bench SAPS</th>
-                    <th>HANA-Prod SAPS</th>
-                    <th>% Aplicado</th>`,
-                spec: `
-                    <th>Generación</th>
-                    <th>Server</th>
-                    <th>Cores</th>
-                    <th>SPECrate2017_int_peak</th>
-                    <th>SPECrate2017_int_basek</th>
-                    <th>% Aplicado</th>`,
-                cpw: `
-                    <th>Generación</th>
-                    <th>Server</th>
-                    <th>Cores</th>
-                    <th>CPW</th>
-                    <th>% Aplicado</th>`
-            };
-
-            $('#table-headers').html(headers[metric]);
-        }
-
         $(document).ready(function() {
-            $('#metric').change(function() {
-                const selectedMetric = $(this).val();
-                updateTableHeaders(selectedMetric);
-            });
-
             $('#generation').change(function() {
-                var generation = $(this).val();
-                $.ajax({
-                    url: '/get_servers',
-                    type: 'POST',
-                    data: {generation: generation},
-                    success: function(data) {
-                        var $serverSelect = $('#server');
-                        $serverSelect.empty();
-                        $serverSelect.append('<option value="" disabled selected>Seleccione un server</option>');
-                        $.each(data, function(index, value) {
-                            $serverSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
-                        });
-                    }
+                $.post('/get_servers', {generation: $(this).val()}, function(data) {
+                    $('#server').empty();
+                    $.each(data, function(i, server) {
+                        $('#server').append('<option value="' + server[0] + '">' + server[0] + '</option>');
+                    });
                 });
             });
 
             $('#server').change(function() {
-                var server = $(this).val();
-                $.ajax({
-                    url: '/get_cores',
-                    type: 'POST',
-                    data: {server: server},
-                    success: function(data) {
-                        var $coresSelect = $('#cores');
-                        $coresSelect.empty();
-                        $coresSelect.append('<option value="" disabled selected>Seleccione cores</option>');
-                        $.each(data, function(index, value) {
-                            $coresSelect.append('<option value="' + value[0] + '">' + value[0] + '</option>');
-                        });
-                    }
+                $.post('/get_cores', {server: $(this).val()}, function(data) {
+                    $('#cores').empty();
+                    $.each(data, function(i, core) {
+                        $('#cores').append('<option value="' + core[0] + '">' + core[0] + '</option>');
+                    });
                 });
             });
 
-            $('#add-button').click(function() {
-                var form = $('#main-form')[0];
-                if (form.checkValidity() === false) {
-                    form.classList.add('was-validated');
-                    return;
-                }
-                form.classList.remove('was-validated');
-
-                var selectedMetric = $('#metric').val();
-                var generation = $('#generation').val();
-                var server = $('#server').val();
-                var cores = $('#cores').val();
-                var percentage = $('#percentage').val();
-                var percentageColumn = $('#percentage-column').val();
-
-                var st = 0, smt2 = 0, smt4 = 0, smt8 = 0;
-
-                if (selectedMetric === 'rperf') {
-                    if (percentageColumn === 'ST') {
-                        st = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT2') {
-                        smt2 = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT4') {
-                        smt4 = parseInt(percentage);
-                    } else if (percentageColumn === 'SMT8') {
-                        smt8 = parseInt(percentage);
-                    }
-                }
-
-                var newRow = `
-                    <tr>
-                        <td>${generation}</td>
-                        <td>${server}</td>
-                        <td>${cores}</td>
-                        <td>${st}</td>
-                        <td>${smt2}</td>
-                        <td>${smt4}</td>
-                        <td>${smt8}</td>
-                        <td>${percentage}</td>
-                    </tr>`;
-
-                $('#configurations-table tbody').append(newRow);
-                updateTotals();
+            $('#metric').change(function() {
+                $('#metricData').empty();
             });
 
-            $('#save-button').click(function() {
-                var configurations = [];
+            $('#addServer').click(function() {
+                const generation = $('#generation').val();
+                const server = $('#server').val();
+                const cores = $('#cores').val();
+                const metric = $('#metric').val();
 
-                $('#configurations-table tbody tr').each(function() {
-                    var row = $(this);
-                    var configuration = {
+                $.post('/get_metric_data', {metric: metric, cores: cores, server: server}, function(data) {
+                    let metricHtml = '';
+                    if (metric === 'rperf') {
+                        metricHtml = '<td>' + data[0].st + '</td><td>' + data[0].smt2 + '</td><td>' + data[0].smt4 + '</td><td>' + data[0].smt8 + '</td>';
+                    } else if (metric === 'saps') {
+                        metricHtml = '<td>' + data[0].sd_bench_saps + '</td><td>' + data[0].hana_prod_saps + '</td>';
+                    } else if (metric === 'spec') {
+                        metricHtml = '<td>' + data[0].specrate2017_int_peak + '</td><td>' + data[0].specrate2017_int_basek + '</td>';
+                    } else if (metric === 'cpw') {
+                        metricHtml = '<td>' + data[0].cpw + '</td>';
+                    }
+
+                    $('#serverTable tbody').append('<tr><td>' + generation + '</td><td>' + server + '</td><td>' + cores + '</td>' + metricHtml + '</tr>');
+                });
+            });
+
+            $('#saveConfigurations').click(function() {
+                const configurations = [];
+                $('#serverTable tbody tr').each(function() {
+                    const row = $(this);
+                    const config = {
                         generation: row.find('td').eq(0).text(),
                         server: row.find('td').eq(1).text(),
-                        cores: row.find('td').eq(2).text(),
-                        st: row.find('td').eq(3).text(),
-                        smt2: row.find('td').eq(4).text(),
-                        smt4: row.find('td').eq(5).text(),
-                        smt8: row.find('td').eq(6).text(),
-                        percentage: row.find('td').eq(7).text()
+                        cores: row.find('td').eq(2).text()
                     };
-                    configurations.push(configuration);
+
+                    if ($('#metric').val() === 'rperf') {
+                        config.st = row.find('td').eq(3).text();
+                        config.smt2 = row.find('td').eq(4).text();
+                        config.smt4 = row.find('td').eq(5).text();
+                        config.smt8 = row.find('td').eq(6).text();
+                    } else if ($('#metric').val() === 'saps') {
+                        config.sd_bench_saps = row.find('td').eq(3).text();
+                        config.hana_prod_saps = row.find('td').eq(4).text();
+                    } else if ($('#metric').val() === 'spec') {
+                        config.specrate2017_int_peak = row.find('td').eq(3).text();
+                        config.specrate2017_int_basek = row.find('td').eq(4).text();
+                    } else if ($('#metric').val() === 'cpw') {
+                        config.cpw = row.find('td').eq(3).text();
+                    }
+
+                    configurations.push(config);
                 });
 
                 $.ajax({
                     url: '/save_configurations',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(configurations),
+                    data: JSON.stringify({configurations: configurations}),
                     success: function(response) {
-                        alert('Configuraciones guardadas correctamente');
+                        alert('Configurations saved successfully!');
                     }
                 });
             });
