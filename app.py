@@ -56,11 +56,25 @@ def get_metric_data():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Obtener información de la tabla server
+    cursor.execute('''
+        SELECT clock, model, type, socket_count, core_per_socket
+        FROM server
+        WHERE name = %s AND cores = %s
+    ''', (server, cores))
+    server_info = cursor.fetchone()
+
+    if not server_info:
+        return jsonify([])  # Devuelve una lista vacía si no se encuentra información
+
+    clock, model, type_, socket_count, core_per_socket = server_info
+
+    # Consulta la métrica específica
     metric_query = {
         'rperf': "SELECT st, smt2, smt4, smt8 FROM rperf WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
         'saps': "SELECT sd_bench_saps, hana_prod_saps FROM saps WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
         'spec': "SELECT specrate2017_int_peak, specrate2017_int_basek FROM spec WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)",
-        'cpw': "SELECT CPW FROM cpw WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)"
+        'cpw': "SELECT cpw FROM cpw WHERE id_server = (SELECT id_server FROM server WHERE name = %s AND cores = %s)"
     }
 
     query = metric_query[metric]
@@ -70,13 +84,25 @@ def get_metric_data():
 
     metric_data = []
     if metric == 'rperf':
-        metric_data = [{"st": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3]} for row in result]
+        metric_data = [{"st": row[0], "smt2": row[1], "smt4": row[2], "smt8": row[3],
+                        "clock": clock, "model": model, "type": type_,
+                        "socket_count": socket_count, "core_per_socket": core_per_socket}
+                        for row in result]
     elif metric == 'saps':
-        metric_data = [{"sd_bench_saps": row[0], "hana_prod_saps": row[1]} for row in result]
+        metric_data = [{"sd_bench_saps": row[0], "hana_prod_saps": row[1],
+                        "clock": clock, "model": model, "type": type_,
+                        "socket_count": socket_count, "core_per_socket": core_per_socket}
+                        for row in result]
     elif metric == 'spec':
-        metric_data = [{"specrate2017_int_peak": row[0], "specrate2017_int_basek": row[1]} for row in result]
+        metric_data = [{"specrate2017_int_peak": row[0], "specrate2017_int_basek": row[1],
+                        "clock": clock, "model": model, "type": type_,
+                        "socket_count": socket_count, "core_per_socket": core_per_socket}
+                        for row in result]
     elif metric == 'cpw':
-        metric_data = [{"cpw": row[0]} for row in result]
+        metric_data = [{"cpw": row[0],
+                        "clock": clock, "model": model, "type": type_,
+                        "socket_count": socket_count, "core_per_socket": core_per_socket}
+                        for row in result]
 
     return jsonify(metric_data)
 
@@ -87,26 +113,20 @@ def save_configurations():
     cursor = conn.cursor()
 
     for config in configurations:
-        if 'st' in config:
-            cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, st, smt2, smt4, smt8, percentage) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['st'], config['smt2'], config['smt4'], config['smt8'], config['percentage'])
-            )
-        elif 'sd_bench_saps' in config:
-            cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, sd_bench_saps, hana_prod_saps, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['sd_bench_saps'], config['hana_prod_saps'], config['percentage'])
-            )
-        elif 'specrate2017_int_peak' in config:
-            cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, specrate2017_int_peak, specrate2017_int_basek, percentage) VALUES (%s, %s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['specrate2017_int_peak'], config['specrate2017_int_basek'], config['percentage'])
-            )
-        elif 'cpw' in config:
-            cursor.execute(
-                'INSERT INTO configurations (generation, server, cores, cpw, percentage) VALUES (%s, %s, %s, %s, %s)',
-                (config['generation'], config['server'], config['cores'], config['cpw'], config['percentage'])
-            )
+        cursor.execute(
+            '''
+            INSERT INTO configurations
+            (generation, server, cores, clock, model, type, socket_count, core_per_socket, st, smt2, smt4, smt8, sd_bench_saps, hana_prod_saps, specrate2017_int_peak, specrate2017_int_basek, cpw, percentage)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''',
+            (config.get('generation'), config.get('server'), config.get('cores'),
+             config.get('clock'), config.get('model'), config.get('type'),
+             config.get('socket_count'), config.get('core_per_socket'),
+             config.get('st'), config.get('smt2'), config.get('smt4'), config.get('smt8'),
+             config.get('sd_bench_saps'), config.get('hana_prod_saps'),
+             config.get('specrate2017_int_peak'), config.get('specrate2017_int_basek'),
+             config.get('cpw'), config.get('percentage'))
+        )
 
     conn.commit()
     conn.close()
