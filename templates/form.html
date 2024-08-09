@@ -292,20 +292,50 @@
                             var type = data[0].type || '';
                             var socket = data[0].socket || '';
                             var corepersocket = data[0].corepersocket || '';
-                            var sm = data[0].sm || '';
-                            var smt2 = data[0].smt2 || '';
-                            var smt4 = data[0].smt4 || '';
-                            var smt8 = data[0].smt8 || '';
 
+                            // Datos de las métricas específicos por métrica
+                            var metric1 = '', metric2 = '';
+                            if (metric === 'rperf') {
+                                metric1 = data[0].st || '';
+                                metric2 = data[0].smt2 || '';
+                                metric3 = data[0].smt4 || '';
+                                metric4 = data[0].smt8 || '';
+                            } else if (metric === 'saps') {
+                                metric1 = data[0].saps1 || '';
+                                metric2 = data[0].saps2 || '';
+                            } else if (metric === 'spec') {
+                                metric1 = data[0].spec1 || '';
+                                metric2 = data[0].spec2 || '';
+                            } else if (metric === 'cpw') {
+                                metric1 = data[0].cpw || '';
+                            }
+
+                            // Calcular porcentaje aplicado
                             var appliedPercentage = 0;
-                            if (percentageColumn === 'ST') {
-                                appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT2') {
-                                appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT4') {
-                                appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
-                            } else if (percentageColumn === 'SMT8') {
-                                appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
+                            if (metric === 'rperf') {
+                                if (percentageColumn === 'ST') {
+                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT2') {
+                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT4') {
+                                    appliedPercentage = (parseFloat(metric3) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SMT8') {
+                                    appliedPercentage = (parseFloat(metric4) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+                            } else if (metric === 'saps') {
+                                if (percentageColumn === 'SD-Bench SAPS') {
+                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'HANA-Prod SAPS') {
+                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+                            } else if (metric === 'spec') {
+                                if (percentageColumn === 'SPECrate2017_int_peak') {
+                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SPECrate2017_init_basek') {
+                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+                            } else if (metric === 'cpw') {
+                                appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
                             }
 
                             var newRow = `<tr>
@@ -317,10 +347,10 @@
                                 <td>${type}</td>
                                 <td>${socket}</td>
                                 <td>${corepersocket}</td>
-                                <td>${sm}</td>
-                                <td>${smt2}</td>
-                                <td>${smt4}</td>
-                                <td>${smt8}</td>
+                                <td>${metric1}</td>
+                                <td>${metric2}</td>
+                                <td>${metric3 || ''}</td>
+                                <td>${metric4 || ''}</td>
                                 <td>${appliedPercentage}</td>
                                 <td><input type="checkbox" class="row-checkbox"></td>
                             </tr>`;
@@ -333,6 +363,7 @@
                     }
                 });
             });
+
 
             $('#clear-table').click(function() {
                 $('#configurations-table tbody').empty();
