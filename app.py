@@ -94,7 +94,7 @@ def get_metric_data():
                         "socket": socket, "corepersocket": corepersocket}
                         for row in result]
     elif metric == 'spec':
-        metric_data = [{"specrate2017_int_peak": row[0], "specrate2017_int_basek": row[1],
+        metric_data = [{"spec1": row[0], "specrate2017_int_basek": row[1],
                         "clock": clock, "model": model, "type": type_,
                         "socket": socket, "corepersocket": corepersocket}
                         for row in result]
