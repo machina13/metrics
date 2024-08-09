@@ -293,49 +293,51 @@
                             var socket = data[0].socket || '';
                             var corepersocket = data[0].corepersocket || '';
 
-                            // Datos de las métricas específicos por métrica
-                            var metric1 = '', metric2 = '';
-                            if (metric === 'rperf') {
-                                metric1 = data[0].st || '';
-                                metric2 = data[0].smt2 || '';
-                                metric3 = data[0].smt4 || '';
-                                metric4 = data[0].smt8 || '';
-                            } else if (metric === 'saps') {
-                                metric1 = data[0].saps1 || '';
-                                metric2 = data[0].saps2 || '';
-                            } else if (metric === 'spec') {
-                                metric1 = data[0].spec1 || '';
-                                metric2 = data[0].spec2 || '';
-                            } else if (metric === 'cpw') {
-                                metric1 = data[0].cpw || '';
-                            }
-
-                            // Calcular porcentaje aplicado
                             var appliedPercentage = 0;
+                            var sm = '', smt2 = '', smt4 = '', smt8 = '';
+                            var saps1 = '', saps2 = '';
+                            var spec1 = '', spec2 = '';
+                            var cpw = '';
+
                             if (metric === 'rperf') {
+                                sm = data[0].sm || '';
+                                smt2 = data[0].smt2 || '';
+                                smt4 = data[0].smt4 || '';
+                                smt8 = data[0].smt8 || '';
+
                                 if (percentageColumn === 'ST') {
-                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(sm) * (parseFloat(percentage) / 100)).toFixed(2);
                                 } else if (percentageColumn === 'SMT2') {
-                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(smt2) * (parseFloat(percentage) / 100)).toFixed(2);
                                 } else if (percentageColumn === 'SMT4') {
-                                    appliedPercentage = (parseFloat(metric3) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(smt4) * (parseFloat(percentage) / 100)).toFixed(2);
                                 } else if (percentageColumn === 'SMT8') {
-                                    appliedPercentage = (parseFloat(metric4) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
                                 }
                             } else if (metric === 'saps') {
+                                saps1 = data[0].saps1 || '';
+                                saps2 = data[0].saps2 || '';
+
                                 if (percentageColumn === 'SD-Bench SAPS') {
-                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(saps1) * (parseFloat(percentage) / 100)).toFixed(2);
                                 } else if (percentageColumn === 'HANA-Prod SAPS') {
-                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(saps2) * (parseFloat(percentage) / 100)).toFixed(2);
                                 }
                             } else if (metric === 'spec') {
+                                spec1 = data[0].spec1 || '';
+                                spec2 = data[0].spec2 || '';
+
                                 if (percentageColumn === 'SPECrate2017_int_peak') {
-                                    appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(spec1) * (parseFloat(percentage) / 100)).toFixed(2);
                                 } else if (percentageColumn === 'SPECrate2017_init_basek') {
-                                    appliedPercentage = (parseFloat(metric2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                    appliedPercentage = (parseFloat(spec2) * (parseFloat(percentage) / 100)).toFixed(2);
                                 }
                             } else if (metric === 'cpw') {
-                                appliedPercentage = (parseFloat(metric1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                cpw = data[0].cpw || '';
+
+                                if (percentageColumn === 'CPW') {
+                                    appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
                             }
 
                             var newRow = `<tr>
@@ -347,13 +349,62 @@
                                 <td>${type}</td>
                                 <td>${socket}</td>
                                 <td>${corepersocket}</td>
-                                <td>${metric1}</td>
-                                <td>${metric2}</td>
-                                <td>${metric3 || ''}</td>
-                                <td>${metric4 || ''}</td>
+                                <td>${sm}</td>
+                                <td>${smt2}</td>
+                                <td>${smt4}</td>
+                                <td>${smt8}</td>
                                 <td>${appliedPercentage}</td>
                                 <td><input type="checkbox" class="row-checkbox"></td>
                             </tr>`;
+
+                            if (metric === 'saps') {
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${clock}</td>
+                                    <td>${model}</td>
+                                    <td>${type}</td>
+                                    <td>${socket}</td>
+                                    <td>${corepersocket}</td>
+                                    <td>${saps1}</td>
+                                    <td>${saps2}</td>
+                                    <td></td><td></td>
+                                    <td>${appliedPercentage}</td>
+                                    <td><input type="checkbox" class="row-checkbox"></td>
+                                </tr>`;
+                            } else if (metric === 'spec') {
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${clock}</td>
+                                    <td>${model}</td>
+                                    <td>${type}</td>
+                                    <td>${socket}</td>
+                                    <td>${corepersocket}</td>
+                                    <td>${spec1}</td>
+                                    <td>${spec2}</td>
+                                    <td></td><td></td>
+                                    <td>${appliedPercentage}</td>
+                                    <td><input type="checkbox" class="row-checkbox"></td>
+                                </tr>`;
+                            } else if (metric === 'cpw') {
+                                newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${clock}</td>
+                                    <td>${model}</td>
+                                    <td>${type}</td>
+                                    <td>${socket}</td>
+                                    <td>${corepersocket}</td>
+                                    <td>${cpw}</td>
+                                    <td></td><td></td><td></td>
+                                    <td>${appliedPercentage}</td>
+                                    <td><input type="checkbox" class="row-checkbox"></td>
+                                </tr>`;
+                            }
 
                             $('#configurations-table tbody').append(newRow);
                             updateTotals();
@@ -363,6 +414,7 @@
                     }
                 });
             });
+
 
 
             $('#clear-table').click(function() {
