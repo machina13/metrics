@@ -89,7 +89,7 @@ def get_metric_data():
                         "socket": socket, "corepersocket": corepersocket}
                         for row in result]
     elif metric == 'saps':
-        metric_data = [{"sd_bench_saps": row[0], "hana_prod_saps": row[1],
+        metric_data = [{"saps1": row[0], "saps2": row[1],
                         "clock": clock, "model": model, "type": type_,
                         "socket": socket, "corepersocket": corepersocket}
                         for row in result]
