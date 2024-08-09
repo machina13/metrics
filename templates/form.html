@@ -299,6 +299,7 @@
                             var spec1 = '', spec2 = '';
                             var cpw = '';
 
+                            // Calculo del valor de % Aplicado basado en la métrica seleccionada
                             if (metric === 'rperf') {
                                 sm = data[0].sm || '';
                                 smt2 = data[0].smt2 || '';
@@ -314,6 +315,23 @@
                                 } else if (percentageColumn === 'SMT8') {
                                     appliedPercentage = (parseFloat(smt8) * (parseFloat(percentage) / 100)).toFixed(2);
                                 }
+
+                                var newRow = `<tr>
+                                    <td>${generation}</td>
+                                    <td>${server}</td>
+                                    <td>${cores}</td>
+                                    <td>${clock}</td>
+                                    <td>${model}</td>
+                                    <td>${type}</td>
+                                    <td>${socket}</td>
+                                    <td>${corepersocket}</td>
+                                    <td>${sm}</td>
+                                    <td>${smt2}</td>
+                                    <td>${smt4}</td>
+                                    <td>${smt8}</td>
+                                    <td>${appliedPercentage}</td>
+                                    <td><input type="checkbox" class="row-checkbox"></td>
+                                </tr>`;
                             } else if (metric === 'saps') {
                                 saps1 = data[0].saps1 || '';
                                 saps2 = data[0].saps2 || '';
@@ -323,42 +341,8 @@
                                 } else if (percentageColumn === 'HANA-Prod SAPS') {
                                     appliedPercentage = (parseFloat(saps2) * (parseFloat(percentage) / 100)).toFixed(2);
                                 }
-                            } else if (metric === 'spec') {
-                                spec1 = data[0].spec1 || '';
-                                spec2 = data[0].spec2 || '';
 
-                                if (percentageColumn === 'SPECrate2017_int_peak') {
-                                    appliedPercentage = (parseFloat(spec1) * (parseFloat(percentage) / 100)).toFixed(2);
-                                } else if (percentageColumn === 'SPECrate2017_init_basek') {
-                                    appliedPercentage = (parseFloat(spec2) * (parseFloat(percentage) / 100)).toFixed(2);
-                                }
-                            } else if (metric === 'cpw') {
-                                cpw = data[0].cpw || '';
-
-                                if (percentageColumn === 'CPW') {
-                                    appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
-                                }
-                            }
-
-                            var newRow = `<tr>
-                                <td>${generation}</td>
-                                <td>${server}</td>
-                                <td>${cores}</td>
-                                <td>${clock}</td>
-                                <td>${model}</td>
-                                <td>${type}</td>
-                                <td>${socket}</td>
-                                <td>${corepersocket}</td>
-                                <td>${sm}</td>
-                                <td>${smt2}</td>
-                                <td>${smt4}</td>
-                                <td>${smt8}</td>
-                                <td>${appliedPercentage}</td>
-                                <td><input type="checkbox" class="row-checkbox"></td>
-                            </tr>`;
-
-                            if (metric === 'saps') {
-                                newRow = `<tr>
+                                var newRow = `<tr>
                                     <td>${generation}</td>
                                     <td>${server}</td>
                                     <td>${cores}</td>
@@ -374,7 +358,16 @@
                                     <td><input type="checkbox" class="row-checkbox"></td>
                                 </tr>`;
                             } else if (metric === 'spec') {
-                                newRow = `<tr>
+                                spec1 = data[0].spec1 || '';
+                                spec2 = data[0].spec2 || '';
+
+                                if (percentageColumn === 'SPECrate2017_int_peak') {
+                                    appliedPercentage = (parseFloat(spec1) * (parseFloat(percentage) / 100)).toFixed(2);
+                                } else if (percentageColumn === 'SPECrate2017_init_basek') {
+                                    appliedPercentage = (parseFloat(spec2) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+
+                                var newRow = `<tr>
                                     <td>${generation}</td>
                                     <td>${server}</td>
                                     <td>${cores}</td>
@@ -390,7 +383,13 @@
                                     <td><input type="checkbox" class="row-checkbox"></td>
                                 </tr>`;
                             } else if (metric === 'cpw') {
-                                newRow = `<tr>
+                                cpw = data[0].cpw || '';
+
+                                if (percentageColumn === 'CPW') {
+                                    appliedPercentage = (parseFloat(cpw) * (parseFloat(percentage) / 100)).toFixed(2);
+                                }
+
+                                var newRow = `<tr>
                                     <td>${generation}</td>
                                     <td>${server}</td>
                                     <td>${cores}</td>
@@ -414,7 +413,6 @@
                     }
                 });
             });
-
 
 
             $('#clear-table').click(function() {
